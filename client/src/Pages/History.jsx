@@ -32,12 +32,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Link, useSearchParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const History = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   // Mock historical documents
   const documents = [
@@ -96,17 +99,7 @@ const History = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
-      {/* Hero Section */}
-      <section className="relative py-16 px-4 sm:px-6 lg:px-8 bg-[url('https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80')] bg-cover bg-center">
-        <div className="max-w-7xl mx-auto text-center bg-white/90 backdrop-blur-sm rounded-xl p-8 shadow-lg">
-          <h1 className="text-4xl md:text-5xl font-bold text-amber-900 mb-4">
-            Historical Documents
-          </h1>
-          <p className="text-xl md:text-2xl text-amber-800 max-w-3xl mx-auto">
-            Primary sources and archival materials documenting Akan history
-          </p>
-        </div>
-      </section>
+    
 
       {/* Main Content */}
       <div className="container py-12 px-4 sm:px-6 lg:px-8">
@@ -173,97 +166,110 @@ const History = () => {
 
           {/* Upload Button */}
           <Sheet>
-            <SheetTrigger asChild>
-              <Button className="bg-amber-600 hover:bg-amber-700 mb-6">
-                <Upload className="h-4 w-4 mr-2" /> Contribute Document
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="sm:max-w-md">
-              <SheetHeader>
-                <SheetTitle>Contribute Historical Document</SheetTitle>
-                <p className="text-sm text-muted-foreground">
-                  Upload documents for review by our historical team
-                </p>
-              </SheetHeader>
-
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium">
-                    Document Title
-                  </label>
-                  <Input placeholder="Enter document title" />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium">
-                    Description
-                  </label>
-                  <textarea
-                    className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                    placeholder="Describe the document's content and significance..."
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium">
-                    Time Period
-                  </label>
-                  <Input placeholder="Example: 18th century" />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium">
-                    Document Type
-                  </label>
-                  <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                    <option value="">Select type</option>
-                    <option value="archival">Archival Document</option>
-                    <option value="oral">Oral History</option>
-                    <option value="photo">Photograph</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium">
-                    Upload File
-                  </label>
-                  <div className="flex items-center justify-center w-full">
-                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-amber-50 hover:bg-amber-100 border-amber-300">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <Upload className="h-8 w-8 text-amber-500 mb-2" />
-                        <p className="text-sm text-amber-700">
-                          <span className="font-semibold">Click to upload</span>{" "}
-                          or drag and drop
-                        </p>
-                        <p className="text-xs text-amber-600">
-                          PDF, JPG, DOCX up to 10MB
-                        </p>
-                      </div>
-                      <input type="file" className="hidden" />
-                    </label>
-                  </div>
-                </div>
-
-                {uploadProgress > 0 && (
-                  <div className="space-y-2">
-                    <Progress value={uploadProgress} className="h-2" />
-                    <p className="text-xs text-muted-foreground text-center">
-                      {uploadProgress}% uploaded
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <SheetFooter>
-                <Button
-                  type="submit"
-                  className="w-full bg-amber-600 hover:bg-amber-700"
-                  onClick={simulateUpload}
-                >
-                  Submit for Review
+            {isAuthenticated ? (
+              <SheetTrigger asChild>
+                <Button className="bg-amber-600 hover:bg-amber-700 mb-6">
+                  <Upload className="h-4 w-4 mr-2" /> Contribute Document
                 </Button>
-              </SheetFooter>
+              </SheetTrigger>
+            ) : (
+              <Button className="bg-amber-600 hover:bg-amber-700 mb-6">
+                <Link to="/login" className="flex justify-center items-center">
+                  {" "}
+                  <Upload className="h-4 w-4 mr-2" /> Contribute Document
+                </Link>
+              </Button>
+            )}
+            <SheetContent className="sm:max-w-md">
+              <div className="p-8 overflow-y-auto">
+                <SheetHeader>
+                  <SheetTitle>Contribute Historical Document</SheetTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Upload documents for review by our historical team
+                  </p>
+                </SheetHeader>
+
+                <div className="grid gap-4 py-4">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium">
+                      Document Title
+                    </label>
+                    <Input placeholder="Enter document title" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium">
+                      Description
+                    </label>
+                    <textarea
+                      className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
+                      placeholder="Describe the document's content and significance..."
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium">
+                      Time Period
+                    </label>
+                    <Input placeholder="Example: 18th century" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium">
+                      Document Type
+                    </label>
+                    <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                      <option value="">Select type</option>
+                      <option value="archival">Archival Document</option>
+                      <option value="oral">Oral History</option>
+                      <option value="photo">Photograph</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium">
+                      Upload File
+                    </label>
+                    <div className="flex items-center justify-center w-full">
+                      <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-amber-50 hover:bg-amber-100 border-amber-300">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <Upload className="h-8 w-8 text-amber-500 mb-2" />
+                          <p className="text-sm text-amber-700">
+                            <span className="font-semibold">
+                              Click to upload
+                            </span>{" "}
+                            or drag and drop
+                          </p>
+                          <p className="text-xs text-amber-600">
+                            PDF, JPG, DOCX up to 10MB
+                          </p>
+                        </div>
+                        <input type="file" className="hidden" />
+                      </label>
+                    </div>
+                  </div>
+
+                  {uploadProgress > 0 && (
+                    <div className="space-y-2">
+                      <Progress value={uploadProgress} className="h-2" />
+                      <p className="text-xs text-muted-foreground text-center">
+                        {uploadProgress}% uploaded
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <SheetFooter>
+                  <Button
+                    type="submit"
+                    className="w-full bg-amber-600 hover:bg-amber-700"
+                    onClick={simulateUpload}
+                  >
+                    Submit for Review
+                  </Button>
+                </SheetFooter>
+              </div>
             </SheetContent>
           </Sheet>
         </div>

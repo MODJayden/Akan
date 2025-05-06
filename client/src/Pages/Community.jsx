@@ -39,11 +39,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useSelector } from "react-redux";
 
 const Community = () => {
   const [activeTab, setActiveTab] = useState("discussions");
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const { user } = useSelector((state) => state.auth);
 
   // Mock community data
   const discussions = [
@@ -128,16 +130,6 @@ const Community = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
       {/* Hero Section */}
-      <section className="relative py-16 px-4 sm:px-6 lg:px-8 bg-[url('https://images.unsplash.com/photo-1518895949257-7621c3c786d7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1588&q=80')] bg-cover bg-center">
-        <div className="max-w-7xl mx-auto text-center bg-white/90 backdrop-blur-sm rounded-xl p-8 shadow-lg">
-          <h1 className="text-4xl md:text-5xl font-bold text-amber-900 mb-4">
-            Akan Community Hub
-          </h1>
-          <p className="text-xl md:text-2xl text-amber-800 max-w-3xl mx-auto">
-            Connect, learn, and celebrate Akan language and culture together
-          </p>
-        </div>
-      </section>
 
       {/* Main Content */}
       <div className="container py-12 px-4 sm:px-6 lg:px-8">
@@ -219,63 +211,65 @@ const Community = () => {
                     </Button>
                   </SheetTrigger>
                   <SheetContent className="sm:max-w-2xl">
-                    <SheetHeader>
-                      <SheetTitle>Create New Discussion</SheetTitle>
-                    </SheetHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium">
-                          Title
-                        </label>
-                        <Input placeholder="What's your discussion about?" />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium">
-                          Content
-                        </label>
-                        <textarea
-                          className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[200px]"
-                          placeholder="Write your discussion content here..."
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium">
-                          Tags
-                        </label>
-                        <div className="flex flex-wrap gap-2">
-                          <Badge
-                            variant="outline"
-                            className="cursor-pointer hover:bg-amber-100"
-                          >
-                            language
-                          </Badge>
-                          <Badge
-                            variant="outline"
-                            className="cursor-pointer hover:bg-amber-100"
-                          >
-                            culture
-                          </Badge>
-                          <Badge
-                            variant="outline"
-                            className="cursor-pointer hover:bg-amber-100"
-                          >
-                            history
-                          </Badge>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-amber-600"
-                          >
-                            + Add Tag
-                          </Button>
+                    <div className="p-8 overflow-y-auto">
+                      <SheetHeader>
+                        <SheetTitle>Create New Discussion</SheetTitle>
+                      </SheetHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium">
+                            Title
+                          </label>
+                          <Input placeholder="What's your discussion about?" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium">
+                            Content
+                          </label>
+                          <textarea
+                            className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[200px]"
+                            placeholder="Write your discussion content here..."
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium">
+                            Tags
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            <Badge
+                              variant="outline"
+                              className="cursor-pointer hover:bg-amber-100"
+                            >
+                              language
+                            </Badge>
+                            <Badge
+                              variant="outline"
+                              className="cursor-pointer hover:bg-amber-100"
+                            >
+                              culture
+                            </Badge>
+                            <Badge
+                              variant="outline"
+                              className="cursor-pointer hover:bg-amber-100"
+                            >
+                              history
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-amber-600"
+                            >
+                              + Add Tag
+                            </Button>
+                          </div>
                         </div>
                       </div>
+                      <SheetFooter>
+                        <Button className="w-full bg-amber-600 hover:bg-amber-700">
+                          Post Discussion
+                        </Button>
+                      </SheetFooter>
                     </div>
-                    <SheetFooter>
-                      <Button className="w-full bg-amber-600 hover:bg-amber-700">
-                        Post Discussion
-                      </Button>
-                    </SheetFooter>
                   </SheetContent>
                 </Sheet>
 
@@ -367,43 +361,45 @@ const Community = () => {
                           </Button>
                         </SheetTrigger>
                         <SheetContent className="sm:max-w-md">
-                          <SheetHeader>
-                            <SheetTitle>Add New Event</SheetTitle>
-                          </SheetHeader>
-                          <div className="grid gap-4 py-4">
-                            <div className="space-y-2">
-                              <label className="block text-sm font-medium">
-                                Event Title
-                              </label>
-                              <Input placeholder="Event name" />
+                          <div className="p-8 overflow-y-auto">
+                            <SheetHeader>
+                              <SheetTitle>Add New Event</SheetTitle>
+                            </SheetHeader>
+                            <div className="grid gap-4 py-4">
+                              <div className="space-y-2">
+                                <label className="block text-sm font-medium">
+                                  Event Title
+                                </label>
+                                <Input placeholder="Event name" />
+                              </div>
+                              <div className="space-y-2">
+                                <label className="block text-sm font-medium">
+                                  Date & Time
+                                </label>
+                                <Input type="datetime-local" />
+                              </div>
+                              <div className="space-y-2">
+                                <label className="block text-sm font-medium">
+                                  Location
+                                </label>
+                                <Input placeholder="Physical or virtual location" />
+                              </div>
+                              <div className="space-y-2">
+                                <label className="block text-sm font-medium">
+                                  Description
+                                </label>
+                                <textarea
+                                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
+                                  placeholder="Describe your event..."
+                                />
+                              </div>
                             </div>
-                            <div className="space-y-2">
-                              <label className="block text-sm font-medium">
-                                Date & Time
-                              </label>
-                              <Input type="datetime-local" />
-                            </div>
-                            <div className="space-y-2">
-                              <label className="block text-sm font-medium">
-                                Location
-                              </label>
-                              <Input placeholder="Physical or virtual location" />
-                            </div>
-                            <div className="space-y-2">
-                              <label className="block text-sm font-medium">
-                                Description
-                              </label>
-                              <textarea
-                                className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                                placeholder="Describe your event..."
-                              />
-                            </div>
+                            <SheetFooter>
+                              <Button className="w-full bg-amber-600 hover:bg-amber-700">
+                                Submit Event
+                              </Button>
+                            </SheetFooter>
                           </div>
-                          <SheetFooter>
-                            <Button className="w-full bg-amber-600 hover:bg-amber-700">
-                              Submit Event
-                            </Button>
-                          </SheetFooter>
                         </SheetContent>
                       </Sheet>
                     </CardTitle>
@@ -524,13 +520,13 @@ const Community = () => {
               <CardContent>
                 <div className="flex items-center gap-3 mb-4">
                   <Avatar className="h-16 w-16">
-                    <AvatarImage src="/images/avatar-user.jpg" />
-                    <AvatarFallback>Y</AvatarFallback>
+                    <AvatarImage src={user?.avatar} alt="User" />
+                    <AvatarFallback>{user?.name[0]}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="font-medium">Your Name</div>
+                    <div className="font-medium">{user?.name}</div>
                     <div className="text-sm text-muted-foreground">
-                      Member since 2023
+                     <i>Joined</i> : {user?.createdAt.split("T")[0]}
                     </div>
                   </div>
                 </div>

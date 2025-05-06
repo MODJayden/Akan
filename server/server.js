@@ -1,0 +1,41 @@
+const express = require("express");
+const cors = require("cors");
+require("dotenv").config();
+const connectDB = require("./Db/Db");
+const passport = require("passport");
+const expressSession = require("express-session");
+const passportSetup = require("./passport");
+const authRouter = require("./Router/auth");
+
+connectDB();
+
+const app = express();
+const port = process.env.PORT || 5500;
+
+// Session configuration
+app.use(
+  expressSession({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(express.json());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+    methods: "GET,PUT,POST,DELETE",
+  })
+);
+
+app.use("/auth", authRouter);
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});

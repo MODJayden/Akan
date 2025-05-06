@@ -35,12 +35,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 const Culture = () => {
   const [activeTab, setActiveTab] = useState("traditions");
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   // Mock upload simulation
   const simulateUpload = () => {
@@ -199,18 +202,7 @@ const Culture = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
-      {/* Hero Section */}
-      <section className="relative py-16 px-4 sm:px-6 lg:px-8 bg-[url('https://images.unsplash.com/photo-1518655048521-f130df041f66?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80')] bg-cover bg-center">
-        <div className="max-w-7xl mx-auto text-center bg-white/90 backdrop-blur-sm rounded-xl p-8 shadow-lg">
-          <h1 className="text-4xl md:text-5xl font-bold text-amber-900 mb-4">
-            Akan Culture Highlights
-          </h1>
-          <p className="text-xl md:text-2xl text-amber-800 max-w-3xl mx-auto">
-            Explore the rich traditions, history, and artistic expressions of
-            the Akan people
-          </p>
-        </div>
-      </section>
+       
 
       {/* Main Content */}
       <div className="container py-12 px-4 sm:px-6 lg:px-8">
@@ -245,71 +237,85 @@ const Culture = () => {
           </div>
 
           <Sheet open={uploadOpen} onOpenChange={setUploadOpen}>
-            <SheetTrigger asChild>
-              <Button className="bg-amber-600 hover:bg-amber-700">
-                <Upload className="h-4 w-4 mr-2" /> Share Your Content
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="sm:max-w-md">
-              <SheetHeader>
-                <SheetTitle>Share Akan Culture</SheetTitle>
-                <p className="text-sm text-muted-foreground">
-                  Upload your photos, videos, or stories about Akan culture
-                  (content will be reviewed before publishing)
-                </p>
-              </SheetHeader>
-
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium">Title</label>
-                  <Input placeholder="Enter a title for your submission" />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium">
-                    Description
-                  </label>
-                  <textarea
-                    className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                    placeholder="Tell us about your submission..."
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium">Media</label>
-                  <div className="flex items-center justify-center w-full">
-                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-amber-50 hover:bg-amber-100 border-amber-300">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <Upload className="h-8 w-8 text-amber-500 mb-2" />
-                        <p className="text-sm text-amber-700">
-                          <span className="font-semibold">Click to upload</span>{" "}
-                          or drag and drop
-                        </p>
-                      </div>
-                      <input type="file" className="hidden" />
-                    </label>
-                  </div>
-                </div>
-
-                {uploadProgress > 0 && (
-                  <div className="space-y-2">
-                    <Progress value={uploadProgress} className="h-2" />
-                    <p className="text-xs text-muted-foreground text-center">
-                      {uploadProgress}% uploaded
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <SheetFooter>
-                <Button
-                  type="submit"
-                  className="w-full bg-amber-600 hover:bg-amber-700"
-                  onClick={simulateUpload}
-                >
-                  Submit for Review
+            {isAuthenticated ? (
+              <SheetTrigger asChild>
+                <Button className="bg-amber-600 hover:bg-amber-700">
+                  <Upload className="h-4 w-4 mr-2" /> Share Your Content
                 </Button>
-              </SheetFooter>
+              </SheetTrigger>
+            ) : (
+              <Button className="bg-amber-600  hover:bg-amber-700">
+                <Link to="/login" className="flex justify-center items-center">
+                  {" "}
+                  <Upload className="h-4 w-4 mr-2" /> Share Your Content
+                </Link>
+              </Button>
+            )}
+
+            <SheetContent className="sm:max-w-md">
+              <div className="p-4">
+                <SheetHeader>
+                  <SheetTitle>Share Akan Culture</SheetTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Upload your photos, videos, or stories about Akan culture
+                    (content will be reviewed before publishing)
+                  </p>
+                </SheetHeader>
+
+                <div className="grid gap-4 py-4">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium">Title</label>
+                    <Input placeholder="Enter a title for your submission" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium">
+                      Description
+                    </label>
+                    <textarea
+                      className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
+                      placeholder="Tell us about your submission..."
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium">Media</label>
+                    <div className="flex items-center justify-center w-full">
+                      <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-amber-50 hover:bg-amber-100 border-amber-300">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <Upload className="h-8 w-8 text-amber-500 mb-2" />
+                          <p className="text-sm text-amber-700">
+                            <span className="font-semibold">
+                              Click to upload
+                            </span>{" "}
+                            or drag and drop
+                          </p>
+                        </div>
+                        <input type="file" className="hidden" />
+                      </label>
+                    </div>
+                  </div>
+
+                  {uploadProgress > 0 && (
+                    <div className="space-y-2">
+                      <Progress value={uploadProgress} className="h-2" />
+                      <p className="text-xs text-muted-foreground text-center">
+                        {uploadProgress}% uploaded
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <SheetFooter>
+                  <Button
+                    type="submit"
+                    className="w-full bg-amber-600 hover:bg-amber-700"
+                    onClick={simulateUpload}
+                  >
+                    Submit for Review
+                  </Button>
+                </SheetFooter>
+              </div>
             </SheetContent>
           </Sheet>
         </div>

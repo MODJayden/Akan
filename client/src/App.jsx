@@ -12,8 +12,20 @@ import Linguistics from "./Pages/Linguistics";
 import Studies from "./Pages/Studies";
 import Community from "./Pages/Community";
 import Login from "./Pages/Login";
+import { useDispatch, useSelector } from "react-redux";
+import { checkAuthStatus } from "./store/auth";
+import { useEffect } from "react";
 
 const App = () => {
+ const { user,isAuthenticated } = useSelector((state) => state.auth);
+ const dispatch=useDispatch()
+  console.log(user);
+  console.log(isAuthenticated);
+  useEffect(() => {
+  dispatch(checkAuthStatus());
+     
+  }, [dispatch]);
+  
   return (
     <>
       <Navbar />

@@ -32,6 +32,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 const Linguistics = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -39,7 +41,7 @@ const Linguistics = () => {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [activeTool, setActiveTool] = useState("frequency");
-
+  const { isAuthenticated } = useSelector((state) => state.auth);
   // Mock linguistic resources
   const resources = [
     {
@@ -94,16 +96,7 @@ const Linguistics = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
       {/* Hero Section */}
-      <section className="relative py-16 px-4 sm:px-6 lg:px-8 bg-[url('https://images.unsplash.com/photo-1546410531-bb4caa6b424d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80')] bg-cover bg-center">
-        <div className="max-w-7xl mx-auto text-center bg-white/90 backdrop-blur-sm rounded-xl p-8 shadow-lg">
-          <h1 className="text-4xl md:text-5xl font-bold text-amber-900 mb-4">
-            Linguistic Analysis
-          </h1>
-          <p className="text-xl md:text-2xl text-amber-800 max-w-3xl mx-auto">
-            Tools and resources for studying Akan language structures
-          </p>
-        </div>
-      </section>
+      
 
       {/* Main Content */}
       <div className="container py-12 px-4 sm:px-6 lg:px-8">
@@ -170,12 +163,22 @@ const Linguistics = () => {
 
           {/* Upload Button */}
           <Sheet>
-            <SheetTrigger asChild>
+            {isAuthenticated ? (
+              <SheetTrigger asChild>
+                <Button className="bg-amber-600 hover:bg-amber-700 mb-6">
+                  <Upload className="h-4 w-4 mr-2" /> Contribute Research
+                </Button>
+              </SheetTrigger>
+            ) : (
               <Button className="bg-amber-600 hover:bg-amber-700 mb-6">
-                <Upload className="h-4 w-4 mr-2" /> Contribute Research
+                <Link to="/login" className="flex justify-center items-center">
+                  {" "}
+                  <Upload className="h-4 w-4 mr-2" /> Contribute Document
+                </Link>
               </Button>
-            </SheetTrigger>
+            )}
             <SheetContent className="sm:max-w-md">
+            <div className="p-8 overflow-y-auto">
               <SheetHeader>
                 <SheetTitle>Contribute Linguistic Research</SheetTitle>
                 <p className="text-sm text-muted-foreground">
@@ -252,6 +255,7 @@ const Linguistics = () => {
                   Submit for Review
                 </Button>
               </SheetFooter>
+              </div>
             </SheetContent>
           </Sheet>
         </div>

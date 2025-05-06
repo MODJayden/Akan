@@ -40,15 +40,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 const Dictionary = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("twi");
-  const [savedWords, setSavedWords] = useState([]);
+  const [savedWords, setSavedWords] = useState(() => {
+    const storedWords = localStorage.getItem("savedWords");
+    return storedWords ? JSON.parse(storedWords) : [];
+  });
+
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [selectedWord, setSelectedWord] = useState(null);
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   // Mock dictionary data
   const dictionaryEntries = [
@@ -133,27 +140,25 @@ const Dictionary = () => {
     }, 300);
   };
 
+  //remove saved word
+  const removeSavedWord = (wordToRemove) => {
+    const updatedSavedWords = savedWords.filter(
+      (word) => word !== wordToRemove
+    );
+    setSavedWords(updatedSavedWords);
+    localStorage.setItem("savedWords", JSON.stringify(updatedSavedWords));
+  };
+
   // Toggle saved word
   const toggleSavedWord = (word) => {
-    setSavedWords((prev) =>
-      prev.includes(word) ? prev.filter((w) => w !== word) : [...prev, word]
-    );
+    const updatedSavedWords = [...savedWords, word];
+    setSavedWords(updatedSavedWords);
+    localStorage.setItem("savedWords", JSON.stringify(updatedSavedWords));
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
-      {/* Hero Section */}
-      <section className="relative py-16 px-4 sm:px-6 lg:px-8 bg-[url('https://images.unsplash.com/photo-1518655048521-f130df041f66?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80')] bg-cover bg-center">
-        <div className="max-w-7xl mx-auto text-center bg-white/90 backdrop-blur-sm rounded-xl p-8 shadow-lg">
-          <h1 className="text-4xl md:text-5xl font-bold text-amber-900 mb-4">
-            Akan Dictionary
-          </h1>
-          <p className="text-xl md:text-2xl text-amber-800 max-w-3xl mx-auto">
-            Explore words and phrases in Twi, Fante, and English with
-            pronunciation guides
-          </p>
-        </div>
-      </section>
+       
 
       {/* Main Content */}
       <div className="container py-12 px-4 sm:px-6 lg:px-8">
@@ -377,75 +382,89 @@ const Dictionary = () => {
                 </CardHeader>
                 <CardFooter>
                   <Sheet>
-                    <SheetTrigger asChild>
-                      <Button variant="outline">
-                        <Upload className="h-4 w-4 mr-2" /> Suggest a Word
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent className="sm:max-w-md">
-                      <SheetHeader>
-                        <SheetTitle>Suggest a Dictionary Entry</SheetTitle>
-                        <p className="text-sm text-muted-foreground">
-                          Help us grow the dictionary by suggesting new words or
-                          corrections
-                        </p>
-                      </SheetHeader>
-
-                      <div className="grid gap-4 py-4">
-                        <div className="space-y-2">
-                          <label className="block text-sm font-medium">
-                            Word (Twi)
-                          </label>
-                          <Input placeholder="Enter the word in Twi" />
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="block text-sm font-medium">
-                            Word (Fante)
-                          </label>
-                          <Input placeholder="Enter the word in Fante" />
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="block text-sm font-medium">
-                            English Meaning
-                          </label>
-                          <Input placeholder="Enter the English translation" />
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="block text-sm font-medium">
-                            Pronunciation
-                          </label>
-                          <Input placeholder="Example: /a-kwaa-ba/" />
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="block text-sm font-medium">
-                            Example Sentence
-                          </label>
-                          <textarea
-                            className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                            placeholder="Provide an example sentence in context..."
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="block text-sm font-medium">
-                            Your Email (optional)
-                          </label>
-                          <Input placeholder="We'll contact you if we have questions" />
-                        </div>
-                      </div>
-
-                      <SheetFooter>
-                        <Button
-                          type="submit"
-                          className="w-full bg-amber-600 hover:bg-amber-700"
-                        >
-                          Submit Suggestion
+                    {isAuthenticated ? (
+                      <SheetTrigger asChild>
+                        <Button variant="outline">
+                          <Upload className="h-4 w-4 mr-2" /> Suggest a Word
                         </Button>
-                      </SheetFooter>
+                      </SheetTrigger>
+                    ) : (
+                      <Button variant="outline">
+                        <Link
+                          to="/login"
+                          className="flex justify-center items-center"
+                        >
+                          {" "}
+                          <Upload className="h-4 w-4 mr-2" /> Suggest a Word
+                        </Link>
+                      </Button>
+                    )}
+                    <SheetContent className="sm:max-w-md">
+                      <div className="p-8 overflow-y-auto">
+                        <SheetHeader>
+                          <SheetTitle>Suggest a Dictionary Entry</SheetTitle>
+                          <p className="text-sm text-muted-foreground">
+                            Help us grow the dictionary by suggesting new words
+                            or corrections
+                          </p>
+                        </SheetHeader>
+
+                        <div className="grid gap-4 py-4">
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium">
+                              Word (Twi)
+                            </label>
+                            <Input placeholder="Enter the word in Twi" />
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium">
+                              Word (Fante)
+                            </label>
+                            <Input placeholder="Enter the word in Fante" />
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium">
+                              English Meaning
+                            </label>
+                            <Input placeholder="Enter the English translation" />
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium">
+                              Pronunciation
+                            </label>
+                            <Input placeholder="Example: /a-kwaa-ba/" />
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium">
+                              Example Sentence
+                            </label>
+                            <textarea
+                              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
+                              placeholder="Provide an example sentence in context..."
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium">
+                              Your Email (optional)
+                            </label>
+                            <Input placeholder="We'll contact you if we have questions" />
+                          </div>
+                        </div>
+
+                        <SheetFooter>
+                          <Button
+                            type="submit"
+                            className="w-full bg-amber-600 hover:bg-amber-700"
+                          >
+                            Submit Suggestion
+                          </Button>
+                        </SheetFooter>
+                      </div>
                     </SheetContent>
                   </Sheet>
                 </CardFooter>
@@ -476,7 +495,7 @@ const Dictionary = () => {
                           variant="ghost"
                           size="icon"
                           className="h-6 w-6"
-                          onClick={() => toggleSavedWord(word)}
+                          onClick={() => removeSavedWord(word)}
                         >
                           <X className="h-3 w-3" />
                         </Button>

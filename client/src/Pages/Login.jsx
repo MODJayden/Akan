@@ -1,9 +1,12 @@
+import { loginWithGoogle } from "@/store/auth";
 import { ArrowRight, BookOpen, Lock, Shield } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
 
 const Login = () => {
+  const dispatch =  useDispatch();
+  const {loading} = useSelector((state) => state.auth);
   const handleGoogleLogin = () => {
-    // This would typically redirect to your backend Google auth endpoint
-    window.location.href = "/api/auth/google";
+    dispatch(loginWithGoogle());
   };
 
   return (
@@ -26,6 +29,7 @@ const Login = () => {
         <div className="space-y-4">
           <button
             onClick={handleGoogleLogin}
+            disabled={loading}
             className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 rounded-lg py-3 px-4 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
           >
             <svg

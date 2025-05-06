@@ -31,37 +31,64 @@ import {
   UserPlus,
   LogOut,
   Settings,
+  Home,
 } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetFooter,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { logoutUser } from "@/store/auth";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const handleLogout = () => {
+    dispatch(logoutUser()).then(() => navigate("/login"));
+    setMobileMenuOpen(false);
+  };
 
   const mobileNavItems = [
     {
+      title: "Home",
+      to: "/",
+      icon: <Home className="h-5 w-5" />,
+    },
+    {
       title: "Language Learning",
       icon: <Languages className="h-5 w-5" />,
-      subItems: [
-        {
-          title: "Lessons",
-          to: "/language/lessons",
-          icon: <BookOpen className="h-4 w-4" />,
-        },
-        {
-          title: "Pronunciation Guide",
-          to: "/language/pronunciation",
-          icon: <Globe className="h-4 w-4" />,
-        },
-        {
-          title: "Exercises",
-          to: "/language/exercises",
-          icon: <Bookmark className="h-4 w-4" />,
-        },
-      ],
+      subItems: isAuthenticated
+        ? [
+            {
+              title: "Lessons",
+              to: "/language/lessons",
+              icon: <BookOpen className="h-4 w-4" />,
+            },
+            {
+              title: "Pronunciation Guide",
+              to: "/language/pronunciation",
+              icon: <Globe className="h-4 w-4" />,
+            },
+            {
+              title: "Exercises",
+              to: "/language/exercises",
+              icon: <Bookmark className="h-4 w-4" />,
+            },
+          ]
+        : [
+            {
+              title: "Pronunciation Guide",
+              to: "/language/pronunciation",
+              icon: <Globe className="h-4 w-4" />,
+            },
+          ],
     },
     {
       title: "Akan Culture Highlights",
@@ -96,19 +123,15 @@ const Navbar = () => {
     },
     {
       title: "Community",
-      to: "/community",
+      to: isAuthenticated ? "/community" : "/login",
       icon: <Users className="h-5 w-5" />,
     },
     {
-      title: isLoggedIn ? "My Profile" : "Login/Signup",
-      to: isLoggedIn ? "/profile" : "/auth",
+      title: isAuthenticated ? "My Profile" : "Login/Signup",
+      to: isAuthenticated ? "/profile" : "/login",
       icon: <User className="h-5 w-5" />,
     },
   ];
-
-  const toggleLogin = () => {
-    setIsLoggedIn(!isLoggedIn);
-  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -124,6 +147,18 @@ const Navbar = () => {
         <nav className="hidden md:flex items-center space-x-1">
           <NavigationMenu>
             <NavigationMenuList>
+              <NavigationMenuItem>
+                <Link
+                  to="/"
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    "  flex gap-2 text-sm font-medium"
+                  )}
+                >
+                  <Home className="h-4 w-4" />
+                  Home
+                </Link>
+              </NavigationMenuItem>
               {/* Language Learning Dropdown */}
               <NavigationMenuItem>
                 <DropdownMenu>
@@ -137,35 +172,50 @@ const Navbar = () => {
                       <ChevronDown className="h-3 w-3 opacity-50" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-48">
-                    <Link
-                      to="/language/lessons"
-                      className="flex items-center gap-2 w-full"
-                    >
-                      <DropdownMenuItem>
-                        <BookOpen className="h-4 w-4" />
-                        Lessons
-                      </DropdownMenuItem>
-                    </Link>
-                    <Link
-                      to="/language/pronunciation"
-                      className="flex items-center gap-2 w-full"
-                    >
-                      <DropdownMenuItem>
-                        <Globe className="h-4 w-4" />
-                        Pronunciation Guide
-                      </DropdownMenuItem>
-                    </Link>
-                    <Link
-                      to="/language/exercises"
-                      className="flex items-center gap-2 w-full"
-                    >
-                      <DropdownMenuItem>
-                        <Bookmark className="h-4 w-4" />
-                        Exercises
-                      </DropdownMenuItem>
-                    </Link>
-                  </DropdownMenuContent>
+
+                  {isAuthenticated ? (
+                    <DropdownMenuContent className="w-48">
+                      <Link
+                        to="/language/lessons"
+                        className="flex items-center gap-2 w-full"
+                      >
+                        <DropdownMenuItem>
+                          <BookOpen className="h-4 w-4" />
+                          Lessons
+                        </DropdownMenuItem>
+                      </Link>
+                      <Link
+                        to="/language/exercises"
+                        className="flex items-center gap-2 w-full"
+                      >
+                        <DropdownMenuItem>
+                          <Bookmark className="h-4 w-4" />
+                          Exercises
+                        </DropdownMenuItem>
+                      </Link>
+                      <Link
+                        to="/language/pronunciation"
+                        className="flex items-center gap-2 w-full"
+                      >
+                        <DropdownMenuItem>
+                          <Globe className="h-4 w-4" />
+                          Pronunciation Guide
+                        </DropdownMenuItem>
+                      </Link>
+                    </DropdownMenuContent>
+                  ) : (
+                    <DropdownMenuContent className="w-48">
+                      <Link
+                        to="/language/pronunciation"
+                        className="flex items-center gap-2 w-full"
+                      >
+                        <DropdownMenuItem>
+                          <Globe className="h-4 w-4" />
+                          Pronunciation Guide
+                        </DropdownMenuItem>
+                      </Link>
+                    </DropdownMenuContent>
+                  )}
                 </DropdownMenu>
               </NavigationMenuItem>
 
@@ -245,7 +295,7 @@ const Navbar = () => {
               {/* Community */}
               <NavigationMenuItem>
                 <Link
-                  to="/community"
+                  to={`${isAuthenticated ? "/community" : "/login"}`}
                   className={cn(
                     navigationMenuTriggerStyle(),
                     "flex gap-2 text-sm font-medium "
@@ -270,27 +320,33 @@ const Navbar = () => {
                 >
                   <Avatar className=" h-8 w-8">
                     <AvatarImage
-                      src={isLoggedIn ? "/avatars/default.png" : undefined}
+                      src={isAuthenticated ? `${user?.avatar}` : undefined}
                       alt="User"
                     />
                     <AvatarFallback>
-                      {isLoggedIn ? "U" : <User className="h-4 w-4" />}
+                      {isAuthenticated ? (
+                        user?.name[0]
+                      ) : (
+                        <User className="h-4 w-4" />
+                      )}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
-                {isLoggedIn ? (
+                {isAuthenticated ? (
                   <>
                     <div className="flex items-center gap-2 p-2">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src="/avatars/default.png" alt="User" />
-                        <AvatarFallback>U</AvatarFallback>
+                        <AvatarImage src={user?.avatar} alt="User" />
+                        <AvatarFallback>{user?.name[0]} </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">User</p>
+                        <p className="text-sm font-medium leading-none">
+                          {user?.name}
+                        </p>
                         <p className="text-xs leading-none text-muted-foreground">
-                          user@example.com
+                          {user?.email}
                         </p>
                       </div>
                     </div>
@@ -314,34 +370,25 @@ const Navbar = () => {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={toggleLogin}
-                      className="text-red-600 focus:text-red-600"
+                    <Button
+                      onClick={handleLogout}
+                      className="w-full bg-white text-red-600 focus:text-red-600"
                     >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Log out
-                    </DropdownMenuItem>
+                      <DropdownMenuItem className="text-red-600 w-full ">
+                        <LogOut className="h-4 w-4 " />
+                        Log out
+                      </DropdownMenuItem>
+                    </Button>
                   </>
                 ) : (
                   <>
                     <DropdownMenuItem asChild>
                       <Link
                         to="/login"
-                        onClick={toggleLogin}
                         className="flex items-center gap-2 w-full"
                       >
                         <LogIn className="h-4 w-4" />
                         Login
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        to="/signup"
-                        onClick={toggleLogin}
-                        className="flex items-center gap-2 w-full"
-                      >
-                        <UserPlus className="h-4 w-4" />
-                        Sign Up
                       </Link>
                     </DropdownMenuItem>
                   </>
@@ -403,6 +450,13 @@ const Navbar = () => {
                   </div>
                 ))}
               </nav>
+              {isAuthenticated ? (
+                <SheetFooter>
+                  <Button onClick={handleLogout} className="w-full">
+                    Sign Out
+                  </Button>
+                </SheetFooter>
+              ) : null}
             </SheetContent>
           </Sheet>
         </div>

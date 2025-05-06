@@ -25,97 +25,100 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-import bg23 from "../../public/bg23.jpeg";
-import bg56 from "../../public/bg56.jpeg";
-import bg1 from "../../public/bg1.jpg";
-import bg12 from "../../public/bg12.jpg";
-import bg33 from "../../public/bg33.gif";
+const bg23 = "/bg23.jpeg";
+const bg56 = "/bg56.jpeg";
+const bg1 = "/bg1.jpg";
+const bg12 = "/bg12.jpg";
+const bg33 = "/bg33.gif";
+
+// Featured content with Unsplash images
+const featuredContent = [
+  {
+    title: "Akan Proverbs Collection",
+    description:
+      "Discover the wisdom of Akan elders through traditional proverbs",
+    category: "Culture",
+    image: bg23,
+  },
+  {
+    title: "Basic Twi Lessons",
+    description:
+      "Start your journey learning the Twi dialect with interactive lessons",
+    category: "Language",
+    image: bg33,
+  },
+  {
+    title: "Festivals Calendar",
+    description: "Explore upcoming Akan cultural festivals and events",
+    category: "Community",
+    image: bg12,
+  },
+];
+
+// Features section
+const features = [
+  {
+    icon: <Languages className="h-8 w-8" />,
+    title: "Language Learning",
+    description: "Interactive lessons in Twi, Fante, and other Akan dialects",
+    link: "/language",
+  },
+  {
+    icon: <Book className="h-8 w-8" />,
+    title: "Culture Highlights",
+    description: "Explore Akan traditions, art, and history",
+    link: "/culture",
+  },
+  {
+    icon: <Search className="h-8 w-8" />,
+    title: "Akan Dictionary",
+    description: "Comprehensive dictionary with pronunciation guides",
+    link: "/dictionary",
+  },
+  {
+    icon: <History className="h-8 w-8" />,
+    title: "Research Features",
+    description: "Academic resources about Akan language and culture",
+    link: "/research",
+  },
+  {
+    icon: <Users className="h-8 w-8" />,
+    title: "Community",
+    description: "Connect with other learners and culture enthusiasts",
+    link: "/community",
+  },
+];
+
+// Testimonials
+const testimonials = [
+  {
+    quote:
+      "This platform helped me reconnect with my roots. The language lessons are so well structured!",
+    author: "Kwame Asante",
+    role: "Diaspora Member",
+    rating: 5,
+  },
+  {
+    quote:
+      "As a teacher, I find the cultural resources invaluable for my classroom. The students love it!",
+    author: "Ama Serwaa",
+    role: "Educator",
+    rating: 5,
+  },
+  {
+    quote:
+      "The most comprehensive Akan language resource I've found online. The pronunciation guides are exceptional.",
+    author: "David Osei",
+    role: "Language Learner",
+    rating: 4,
+  },
+];
 
 const Home = () => {
-  // Featured content with Unsplash images
-  const featuredContent = [
-    {
-      title: "Akan Proverbs Collection",
-      description:
-        "Discover the wisdom of Akan elders through traditional proverbs",
-      category: "Culture",
-      image:bg23
-      ,
-    },
-    {
-      title: "Basic Twi Lessons",
-      description:
-        "Start your journey learning the Twi dialect with interactive lessons",
-      category: "Language",
-      image:bg33
-    },
-    {
-      title: "Festivals Calendar",
-      description: "Explore upcoming Akan cultural festivals and events",
-      category: "Community",
-      image:bg12
-    },
-  ];
-
-  // Features section
-  const features = [
-    {
-      icon: <Languages className="h-8 w-8" />,
-      title: "Language Learning",
-      description: "Interactive lessons in Twi, Fante, and other Akan dialects",
-      link: "/language",
-    },
-    {
-      icon: <Book className="h-8 w-8" />,
-      title: "Culture Highlights",
-      description: "Explore Akan traditions, art, and history",
-      link: "/culture",
-    },
-    {
-      icon: <Search className="h-8 w-8" />,
-      title: "Akan Dictionary",
-      description: "Comprehensive dictionary with pronunciation guides",
-      link: "/dictionary",
-    },
-    {
-      icon: <History className="h-8 w-8" />,
-      title: "Research Features",
-      description: "Academic resources about Akan language and culture",
-      link: "/research",
-    },
-    {
-      icon: <Users className="h-8 w-8" />,
-      title: "Community",
-      description: "Connect with other learners and culture enthusiasts",
-      link: "/community",
-    },
-  ];
-
-  // Testimonials
-  const testimonials = [
-    {
-      quote:
-        "This platform helped me reconnect with my roots. The language lessons are so well structured!",
-      author: "Kwame Asante",
-      role: "Diaspora Member",
-      rating: 5,
-    },
-    {
-      quote:
-        "As a teacher, I find the cultural resources invaluable for my classroom. The students love it!",
-      author: "Ama Serwaa",
-      role: "Educator",
-      rating: 5,
-    },
-    {
-      quote:
-        "The most comprehensive Akan language resource I've found online. The pronunciation guides are exceptional.",
-      author: "David Osei",
-      role: "Language Learner",
-      rating: 4,
-    },
-  ];
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
@@ -131,15 +134,19 @@ const Home = () => {
               the Akan people
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-6 text-lg">
-                Start Learning
-              </Button>
-              <Button
-                variant="outline"
-                className="border-amber-600 text-amber-700 hover:bg-amber-50 px-8 py-6 text-lg"
-              >
-                Explore Culture
-              </Button>
+              <Link to={isAuthenticated ? "/language/lessons" : "/login"}>
+                <Button className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-6 text-lg">
+                  Start Learning
+                </Button>
+              </Link>
+              <Link to="/culture">
+                <Button
+                  variant="outline"
+                  className="border-amber-600 text-amber-700 hover:bg-amber-50 px-8 py-6 text-lg"
+                >
+                  Explore Culture
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -167,12 +174,14 @@ const Home = () => {
                 diaspora communities with their roots, and introducing the world
                 to the beauty of Akan traditions.
               </p>
-              <Button
-                variant="outline"
-                className="border-amber-600 text-amber-700 hover:bg-amber-50"
-              >
-                Learn About Our Story
-              </Button>
+              <Link to="/research/cultural-studies">
+                <Button
+                  variant="outline"
+                  className="border-amber-600 text-amber-700 hover:bg-amber-50"
+                >
+                  Learn About Our Story
+                </Button>
+              </Link>
             </div>
             <div className="rounded-xl overflow-hidden shadow-lg">
               <img
@@ -325,7 +334,10 @@ const Home = () => {
       </section>
 
       {/* Enhanced Call to Action */}
-      <section style={{backgroundImage:`url(${bg56})`}} className="py-20 px-4 sm:px-6 lg:px-8 bg-cover bg-center">
+      <section
+        style={{ backgroundImage: `url(${bg56})` }}
+        className="py-20 px-4 sm:px-6 lg:px-8 bg-cover bg-center"
+      >
         <div className="max-w-4xl mx-auto text-center bg-white/90 backdrop-blur-sm rounded-xl p-12 shadow-lg">
           <h2 className="text-3xl md:text-4xl font-bold mb-6 text-amber-900">
             Join Our Growing Community
@@ -335,15 +347,19 @@ const Home = () => {
             speakers to deepen your understanding of Akan heritage.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Link to="/login" >
             <Button className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-6 text-lg">
               Become a Member
             </Button>
+            </Link>
+            <Link to="/culture" >
             <Button
               variant="outline"
               className="border-amber-600 text-amber-700 hover:bg-amber-50 px-8 py-6 text-lg"
             >
               Take a Tour
             </Button>
+            </Link>
           </div>
         </div>
       </section>
