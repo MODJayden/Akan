@@ -1,29 +1,33 @@
 // AuthWrapper.jsx
 import { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { checkAuthStatus } from './../store/auth';
-import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { checkAuthStatus } from '../../store/auth';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-const AuthWrapper = ({ children }) => {
+const AuthWrapper = ({ children,isAuthenticated,loading }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated, loading } = useSelector((state) => state.auth);
-
-  useEffect(() => {
-    // Check auth status when component mounts
-    dispatch(checkAuthStatus());
-  }, [dispatch]);
+  const location = useLocation();
+  const { pathname } = location;
+  
 
   useEffect(() => {
     // Handle redirect after Google OAuth callback
-    const urlParams = new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(location.search); // Use location.search from useLocation
     const authStatus = urlParams.get('auth');
     
     if (authStatus === 'success') {
+      // This specific re-check can be useful after an OAuth redirect
+      // to ensure the state is immediately updated.
       dispatch(checkAuthStatus());
-      navigate('/culture');
+      navigate('/'); // Navigate to a clean path after processing OAuth params
     }
-  }, [dispatch, navigate]);
+
+    // Redirect from /login if already authenticated
+    if (isAuthenticated && pathname === "/login") {
+      navigate("/", { replace: true });
+    }
+  }, [dispatch, navigate, isAuthenticated, pathname, location.search]); // Added all relevant dependencies
 
   if (loading) {
     return <div>Loading authentication status...</div>;
