@@ -115,7 +115,7 @@ const Navbar = () => {
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
-          <span className="flex text-amber-500 text-xl font-bold">
+          <span className="flex   text-xl font-bold">
             <Gem className="text-amber-500" /> Akan Heritage
           </span>
         </Link>
@@ -130,7 +130,7 @@ const Navbar = () => {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="flex gap-1 text-sm text-amber-500 font-medium"
+                      className="flex gap-1 text-sm  font-medium"
                     >
                       <Languages className="h-4 w-4" />
                       Language Learning
@@ -175,7 +175,7 @@ const Navbar = () => {
                   to="/culture"
                   className={cn(
                     navigationMenuTriggerStyle(),
-                    "text-amber-500 flex gap-2 text-sm font-medium"
+                    "  flex gap-2 text-sm font-medium"
                   )}
                 >
                   <Book className="h-4 w-4" />
@@ -189,7 +189,7 @@ const Navbar = () => {
                   to="/dictionary"
                   className={cn(
                     navigationMenuTriggerStyle(),
-                    "flex gap-2 text-sm font-medium text-amber-500"
+                    "flex gap-2 text-sm font-medium  "
                   )}
                 >
                   <Search className="h-4 w-4" />
@@ -203,7 +203,7 @@ const Navbar = () => {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="flex text-amber-500 gap-1 text-sm font-medium"
+                      className="flex   gap-1 text-sm font-medium"
                     >
                       <History className="h-4 w-4" />
                       Research
@@ -248,7 +248,7 @@ const Navbar = () => {
                   to="/community"
                   className={cn(
                     navigationMenuTriggerStyle(),
-                    "flex gap-2 text-sm font-medium text-amber-500"
+                    "flex gap-2 text-sm font-medium "
                   )}
                 >
                   <Users className="h-4 w-4" />
