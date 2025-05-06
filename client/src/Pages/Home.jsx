@@ -26,6 +26,12 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
+import bg23 from "../../public/bg23.jpeg";
+import bg56 from "../../public/bg56.jpeg";
+import bg1 from "../../public/bg1.jpg";
+import bg12 from "../../public/bg12.jpg";
+import bg33 from "../../public/bg33.gif";
+
 const Home = () => {
   // Featured content with Unsplash images
   const featuredContent = [
@@ -34,23 +40,21 @@ const Home = () => {
       description:
         "Discover the wisdom of Akan elders through traditional proverbs",
       category: "Culture",
-      image:
-        "https://images.unsplash.com/photo-1518655048521-f130df041f66?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+      image:bg23
+      ,
     },
     {
       title: "Basic Twi Lessons",
       description:
         "Start your journey learning the Twi dialect with interactive lessons",
       category: "Language",
-      image:
-        "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80",
+      image:bg33
     },
     {
       title: "Festivals Calendar",
       description: "Explore upcoming Akan cultural festivals and events",
       category: "Community",
-      image:
-        "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+      image:bg12
     },
   ];
 
@@ -172,8 +176,7 @@ const Home = () => {
             </div>
             <div className="rounded-xl overflow-hidden shadow-lg">
               <img
-                src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
-                alt="Akan elders sharing knowledge"
+                src={bg1}
                 className="w-full h-auto object-cover"
                 loading="lazy"
               />
@@ -322,7 +325,7 @@ const Home = () => {
       </section>
 
       {/* Enhanced Call to Action */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[url('https://images.unsplash.com/photo-1518895949257-7621c3c786d7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1588&q=80')] bg-cover bg-center">
+      <section style={{backgroundImage:`url(${bg56})`}} className="py-20 px-4 sm:px-6 lg:px-8 bg-cover bg-center">
         <div className="max-w-4xl mx-auto text-center bg-white/90 backdrop-blur-sm rounded-xl p-12 shadow-lg">
           <h2 className="text-3xl md:text-4xl font-bold mb-6 text-amber-900">
             Join Our Growing Community
