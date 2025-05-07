@@ -1,7 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import Navbar from "./components/component/Navbar";
 import Home from "./Pages/Home";
-import Footer from "./components/component/Footer";
 import Lessons from "./Pages/Lessons";
 import Pronunciation from "./Pages/Pronounciation";
 import Exercises from "./Pages/Excercise";
@@ -16,7 +14,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { checkAuthStatus } from "./store/auth";
 import { useEffect } from "react";
 import AuthWrapper from "./components/component/AuthWrapper";
-import NotFound from "./Pages/NotFound"; // Import the NotFound component
+import AdminLayout from "./Pages/admin/AdminLayout";
+import UserLayout from "./Pages/UserLayout";
+import UploadLessons from "./Pages/admin/UploadLessons";
+import UploadExcersice from "./Pages/admin/UploadExcersice";
+import NotFound from "./Pages/NotFound";
+import Resources from "./Pages/admin/Resources";
 
 const App = () => {
   const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
@@ -28,100 +31,49 @@ const App = () => {
 
   return (
     <>
-      <Navbar />
       <Routes>
+        <Route
+          path="/admin"
+          element={
+            <AuthWrapper
+              isAuthenticated={isAuthenticated}
+              loading={loading}
+              user={user}
+            >
+              <AdminLayout />
+            </AuthWrapper>
+          }
+        >
+          <Route path="lessons/upload" element={<UploadLessons />} />
+          <Route path="excercises/upload" element={<UploadExcersice />} />
+          <Route path="resources/upload" element={<Resources />} />
+        </Route>
         <Route
           path="/"
           element={
-            <AuthWrapper isAuthenticated={isAuthenticated} loading={loading}>
-              <Home />
+            <AuthWrapper
+              isAuthenticated={isAuthenticated}
+              loading={loading}
+              user={user}
+            >
+              <UserLayout />
             </AuthWrapper>
           }
-        />
-        <Route
-          path="/language/lessons"
-          element={
-            <AuthWrapper isAuthenticated={isAuthenticated} loading={loading}>
-              <Lessons />
-            </AuthWrapper>
-          }
-        />
-        <Route
-          path="/language/pronunciation"
-          element={
-            <AuthWrapper isAuthenticated={isAuthenticated} loading={loading}>
-              <Pronunciation />
-            </AuthWrapper>
-          }
-        />
-        <Route
-          path="/language/exercises"
-          element={
-            <AuthWrapper isAuthenticated={isAuthenticated} loading={loading}>
-              <Exercises />
-            </AuthWrapper>
-          }
-        />
-        <Route
-          path="/culture"
-          element={
-            <AuthWrapper isAuthenticated={isAuthenticated} loading={loading}>
-              <Culture />
-            </AuthWrapper>
-          }
-        />
-        <Route
-          path="/dictionary"
-          element={
-            <AuthWrapper isAuthenticated={isAuthenticated} loading={loading}>
-              <Dictionary />
-            </AuthWrapper>
-          }
-        />
-        <Route
-          path="/research/history"
-          element={
-            <AuthWrapper isAuthenticated={isAuthenticated} loading={loading}>
-              <History />
-            </AuthWrapper>
-          }
-        />
-        <Route
-          path="/research/linguistics"
-          element={
-            <AuthWrapper isAuthenticated={isAuthenticated} loading={loading}>
-              <Linguistics />
-            </AuthWrapper>
-          }
-        />
-        <Route
-          path="/research/cultural-studies"
-          element={
-            <AuthWrapper isAuthenticated={isAuthenticated} loading={loading}>
-              <Studies />
-            </AuthWrapper>
-          }
-        />
-        <Route
-          path="/community"
-          element={
-            <AuthWrapper isAuthenticated={isAuthenticated} loading={loading}>
-              <Community />
-            </AuthWrapper>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <AuthWrapper isAuthenticated={isAuthenticated} loading={loading}>
-              <Login />
-            </AuthWrapper>
-          }
-        />
-        {/* Catch-all route for 404 Not Found page */}
+        >
+          <Route path="/" element={<Home />} />
+          <Route path="language/lessons" element={<Lessons />} />
+          <Route path="language/pronunciation" element={<Pronunciation />} />
+          <Route path="language/exercises" element={<Exercises />} />
+          <Route path="culture" element={<Culture />} />
+          <Route path="dictionary" element={<Dictionary />} />
+          <Route path="research/history" element={<History />} />
+          <Route path="research/linguistics" element={<Linguistics />} />
+          <Route path="research/cultural-studies" element={<Studies />} />
+          <Route path="community" element={<Community />} />
+          <Route path="login" element={<Login />} />
+        </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <Footer />
     </>
   );
 };

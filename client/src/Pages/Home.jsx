@@ -347,18 +347,27 @@ const Home = () => {
             speakers to deepen your understanding of Akan heritage.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link to="/login" >
-            <Button className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-6 text-lg">
-              Become a Member
-            </Button>
-            </Link>
-            <Link to="/culture" >
-            <Button
-              variant="outline"
-              className="border-amber-600 text-amber-700 hover:bg-amber-50 px-8 py-6 text-lg"
-            >
-              Take a Tour
-            </Button>
+            {isAuthenticated ? (
+              <Link to="/language/lessons">
+                <Button className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-6 text-lg">
+                  Start Learning
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/login">
+                <Button className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-6 text-lg">
+                  Become a Member
+                </Button>
+              </Link>
+            )}
+
+            <Link to="/culture">
+              <Button
+                variant="outline"
+                className="border-amber-600 text-amber-700 hover:bg-amber-50 px-8 py-6 text-lg"
+              >
+                Take a Tour
+              </Button>
             </Link>
           </div>
         </div>
