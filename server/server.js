@@ -7,6 +7,8 @@ const expressSession = require("express-session");
 const passportSetup = require("./passport");
 const authRouter = require("./Router/auth");
 const lessonsRouter = require("./Router/lessons");
+const resourcesRouter = require("./Router/Resources");
+const excerciseRouter = require("./Router/Excersice");
 
 connectDB();
 
@@ -37,7 +39,8 @@ app.use(
 
 app.use("/auth", authRouter);
 app.use("/api/lessons", lessonsRouter);
-
+app.use("/api/resources", resourcesRouter);
+app.use("/api/exercise", excerciseRouter);
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });

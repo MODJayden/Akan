@@ -20,6 +20,12 @@ import UploadLessons from "./Pages/admin/UploadLessons";
 import UploadExcersice from "./Pages/admin/UploadExcersice";
 import NotFound from "./Pages/NotFound";
 import Resources from "./Pages/admin/Resources";
+import Begginers from "./Pages/Begginers";
+import Intermediate from "./Pages/Intermediate";
+import Advanced from "./Pages/Advanced";
+import PracticeVocabs from "./Pages/PracticeVocabs";
+import FillinPractice from "./Pages/FillinPractice";
+import SentencePractice from "./Pages/SentencePractice";
 
 const App = () => {
   const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
@@ -71,6 +77,12 @@ const App = () => {
           <Route path="research/cultural-studies" element={<Studies />} />
           <Route path="community" element={<Community />} />
           <Route path="login" element={<Login />} />
+          <Route path="lesson/begginers" element={<Begginers />} />
+          <Route path="lesson/intermediate" element={<Intermediate />} />
+          <Route path="lesson/advanced" element={<Advanced />} />
+          <Route path="exercise/vocab" element={<PracticeVocabs />} />
+          <Route path="exercise/fillin" element={<FillinPractice />} />
+          <Route path="exercise/sentence" element={<SentencePractice />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

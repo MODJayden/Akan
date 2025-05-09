@@ -17,6 +17,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Link } from "react-router-dom";
 
 const Exercises = () => {
   const [currentExercise, setCurrentExercise] = useState(null);
@@ -29,24 +30,21 @@ const Exercises = () => {
       description: "Match Twi words with their English translations",
       icon: <Check className="h-6 w-6" />,
       color: "text-green-600 bg-green-100",
+      nav: "/exercise/vocab",
     },
     {
       title: "Fill in the Blank",
       description: "Complete sentences with missing words",
       icon: <HelpCircle className="h-6 w-6" />,
       color: "text-blue-600 bg-blue-100",
-    },
-    {
-      title: "Listening Comprehension",
-      description: "Answer questions based on audio clips",
-      icon: <Clock className="h-6 w-6" />,
-      color: "text-purple-600 bg-purple-100",
+      nav: "/exercise/fillin",
     },
     {
       title: "Sentence Construction",
       description: "Arrange words to form correct sentences",
       icon: <Award className="h-6 w-6" />,
       color: "text-amber-600 bg-amber-100",
+      nav: "/exercise/sentence",
     },
   ];
 
@@ -132,13 +130,14 @@ const Exercises = () => {
                   <CardDescription>{type.description}</CardDescription>
                 </CardHeader>
                 <CardFooter>
-                  <Button
-                    className="w-full"
-                    variant="outline"
-                    onClick={() => setCurrentExercise(index + 1)}
-                  >
-                    Start Practice <ChevronRight className="h-4 w-4 ml-2" />
-                  </Button>
+                  <Link to={type.nav} className="w-full">
+                    <Button
+                      className="w-full"
+                      variant="outline"
+                    >
+                      Start Practice <ChevronRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </Link>
                 </CardFooter>
               </Card>
             ))}

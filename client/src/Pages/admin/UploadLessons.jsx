@@ -1,8 +1,6 @@
-
-import { generateLesson } from "@/store/Lesson";
+import { generateLesson, getLesson } from "@/store/Lesson";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getLesson } from "@/store/Lesson";
 import { BookOpen, ChevronDown, ChevronUp, Volume2 } from "lucide-react";
 import {
   Sheet,
@@ -41,6 +39,8 @@ const UploadLessons = () => {
       if (res?.payload?.success) {
         setIsGenerating(false);
         setSheetOpen(false);
+        dispatch(getLesson());
+        setFormData({});
       } else {
         console.log("something went wrong");
       }

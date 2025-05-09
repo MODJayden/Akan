@@ -179,7 +179,7 @@ const Navbar = () => {
                         to="/language/lessons"
                         className="flex items-center gap-2 w-full"
                       >
-                        <DropdownMenuItem>
+                        <DropdownMenuItem className={"w-full"}>
                           <BookOpen className="h-4 w-4" />
                           Lessons
                         </DropdownMenuItem>
@@ -188,7 +188,7 @@ const Navbar = () => {
                         to="/language/exercises"
                         className="flex items-center gap-2 w-full"
                       >
-                        <DropdownMenuItem>
+                        <DropdownMenuItem className={"w-full"}>
                           <Bookmark className="h-4 w-4" />
                           Exercises
                         </DropdownMenuItem>
@@ -197,7 +197,7 @@ const Navbar = () => {
                         to="/language/pronunciation"
                         className="flex items-center gap-2 w-full"
                       >
-                        <DropdownMenuItem>
+                        <DropdownMenuItem className={"w-full"}>
                           <Globe className="h-4 w-4" />
                           Pronunciation Guide
                         </DropdownMenuItem>
@@ -209,7 +209,7 @@ const Navbar = () => {
                         to="/language/pronunciation"
                         className="flex items-center gap-2 w-full"
                       >
-                        <DropdownMenuItem>
+                        <DropdownMenuItem className={"w-full"}>
                           <Globe className="h-4 w-4" />
                           Pronunciation Guide
                         </DropdownMenuItem>
