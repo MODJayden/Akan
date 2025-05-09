@@ -92,7 +92,7 @@ const FillinPractice = () => {
         {/* Header */}
         <div className="text-center mb-8 relative">
           <Link
-            to="/language/lessons"
+            to="/akan/language/exercises"
             className="absolute left-0 top-1/2 transform -translate-y-1/2"
           >
             <ArrowLeftCircle className="text-amber-600 w-8 h-8 hover:text-amber-700 transition-colors" />

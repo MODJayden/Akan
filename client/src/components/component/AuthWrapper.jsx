@@ -4,14 +4,12 @@ import { useDispatch } from "react-redux";
 import { checkAuthStatus } from "../../store/auth";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const AuthWrapper = ({ children, isAuthenticated, loading,user }) => {
+const AuthWrapper = ({ children, isAuthenticated, loading, user }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const { pathname } = location;
 
- 
-  
   useEffect(() => {
     // Handle redirect after Google OAuth callback
     const urlParams = new URLSearchParams(location.search); // Use location.search from useLocation
@@ -31,7 +29,24 @@ const AuthWrapper = ({ children, isAuthenticated, loading,user }) => {
     if (isAuthenticated && user?.role === "admin") {
       navigate("/admin/excercises/upload", { replace: true });
     }
-  }, [dispatch, isAuthenticated, ]); // Added all relevant dependencies
+  }, [dispatch, isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated && pathname.includes("/akan/")) {
+      navigate("/login", { replace: true });
+    }
+    if (!isAuthenticated && pathname.includes("/admin/")) {
+      navigate("/login", { replace: true });
+    }
+    if(isAuthenticated && pathname.includes("/admin/") && !user?.role === "admin") {
+      navigate("/", { replace: true });
+    }
+    if(isAuthenticated && pathname.includes("/akan/") && user?.role === "admin") {
+      navigate("/admin/excercises/upload", { replace: true });
+    }
+  }, [isAuthenticated, navigate,location]);
+
+  // Added all relevant dependencies
 
   if (loading)
     return (

@@ -64,7 +64,7 @@ const features = [
     icon: <Languages className="h-8 w-8" />,
     title: "Language Learning",
     description: "Interactive lessons in Twi, Fante, and other Akan dialects",
-    link: "/language",
+    link: "/akan/language/lessons",
   },
   {
     icon: <Book className="h-8 w-8" />,
@@ -88,7 +88,7 @@ const features = [
     icon: <Users className="h-8 w-8" />,
     title: "Community",
     description: "Connect with other learners and culture enthusiasts",
-    link: "/community",
+    link: "/akan/community",
   },
 ];
 
@@ -134,7 +134,7 @@ const Home = () => {
               the Akan people
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link to={isAuthenticated ? "/language/lessons" : "/login"}>
+              <Link to={isAuthenticated ? "/akan/language/lessons" : "/login"}>
                 <Button className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-6 text-lg">
                   Start Learning
                 </Button>
@@ -348,7 +348,7 @@ const Home = () => {
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             {isAuthenticated ? (
-              <Link to="/language/lessons">
+              <Link to="/akan/language/lessons">
                 <Button className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-6 text-lg">
                   Start Learning
                 </Button>

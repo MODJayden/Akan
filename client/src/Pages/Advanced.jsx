@@ -96,7 +96,7 @@ const Advanced = () => {
         </div>
       ) : (
         <div className="max-w-4xl mx-auto p-4 sm:p-6">
-          <Link to={"/language/lessons"} className="fixed left-4 top-24 z-50">
+          <Link to={"/akan/language/lessons"} className="fixed left-4 top-24 z-50">
             <ArrowLeftCircle className="text-amber-600 w-6 h-6" />
           </Link>
 

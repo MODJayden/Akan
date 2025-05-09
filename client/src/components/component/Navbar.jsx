@@ -68,7 +68,7 @@ const Navbar = () => {
         ? [
             {
               title: "Lessons",
-              to: "/language/lessons",
+              to: "/akan/language/lessons",
               icon: <BookOpen className="h-4 w-4" />,
             },
             {
@@ -78,7 +78,7 @@ const Navbar = () => {
             },
             {
               title: "Exercises",
-              to: "/language/exercises",
+              to: "/akan/language/exercises",
               icon: <Bookmark className="h-4 w-4" />,
             },
           ]
@@ -123,7 +123,7 @@ const Navbar = () => {
     },
     {
       title: "Community",
-      to: isAuthenticated ? "/community" : "/login",
+      to: isAuthenticated ? "/akan/community" : "/login",
       icon: <Users className="h-5 w-5" />,
     },
     {
@@ -176,7 +176,7 @@ const Navbar = () => {
                   {isAuthenticated ? (
                     <DropdownMenuContent className="w-48">
                       <Link
-                        to="/language/lessons"
+                        to="/akan/language/lessons"
                         className="flex items-center gap-2 w-full"
                       >
                         <DropdownMenuItem className={"w-full"}>
@@ -185,7 +185,7 @@ const Navbar = () => {
                         </DropdownMenuItem>
                       </Link>
                       <Link
-                        to="/language/exercises"
+                        to="/akan/language/exercises"
                         className="flex items-center gap-2 w-full"
                       >
                         <DropdownMenuItem className={"w-full"}>
@@ -295,7 +295,7 @@ const Navbar = () => {
               {/* Community */}
               <NavigationMenuItem>
                 <Link
-                  to={`${isAuthenticated ? "/community" : "/login"}`}
+                  to={`${isAuthenticated ? "/akan/community" : "/login"}`}
                   className={cn(
                     navigationMenuTriggerStyle(),
                     "flex gap-2 text-sm font-medium "

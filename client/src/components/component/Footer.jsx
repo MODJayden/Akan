@@ -7,7 +7,7 @@ const Footer = () => {
     {
       title: "Resources",
       links: [
-        { name: "Language Learning", href: "/language" },
+        { name: "Language Learning", href: "/akan/language/lessons" },
         { name: "Culture Highlights", href: "/culture" },
         { name: "Akan Dictionary", href: "/dictionary" },
         { name: "Research Features", href: "/research" },
@@ -16,10 +16,10 @@ const Footer = () => {
     {
       title: "Community",
       links: [
-        { name: "Discussion Forums", href: "/community/forums" },
-        { name: "Events Calendar", href: "/community/events" },
-        { name: "Meet Native Speakers", href: "/community/speakers" },
-        { name: "Volunteer Opportunities", href: "/community/volunteer" },
+        { name: "Discussion Forums", href: "/akan/community/forums" },
+        { name: "Events Calendar", href: "/akan/community/events" },
+        { name: "Meet Native Speakers", href: "/akan/community/speakers" },
+        { name: "Volunteer Opportunities", href: "/akan/community/volunteer" },
       ],
     },
     {

@@ -67,22 +67,22 @@ const App = () => {
           }
         >
           <Route path="/" element={<Home />} />
-          <Route path="language/lessons" element={<Lessons />} />
+          <Route path="akan/language/lessons" element={<Lessons />} />
           <Route path="language/pronunciation" element={<Pronunciation />} />
-          <Route path="language/exercises" element={<Exercises />} />
+          <Route path="akan/language/exercises" element={<Exercises />} />
           <Route path="culture" element={<Culture />} />
           <Route path="dictionary" element={<Dictionary />} />
           <Route path="research/history" element={<History />} />
           <Route path="research/linguistics" element={<Linguistics />} />
           <Route path="research/cultural-studies" element={<Studies />} />
-          <Route path="community" element={<Community />} />
+          <Route path="akan/community" element={<Community />} />
           <Route path="login" element={<Login />} />
-          <Route path="lesson/begginers" element={<Begginers />} />
-          <Route path="lesson/intermediate" element={<Intermediate />} />
-          <Route path="lesson/advanced" element={<Advanced />} />
-          <Route path="exercise/vocab" element={<PracticeVocabs />} />
-          <Route path="exercise/fillin" element={<FillinPractice />} />
-          <Route path="exercise/sentence" element={<SentencePractice />} />
+          <Route path="akan/language/beginners" element={<Begginers />} />
+          <Route path="akan/lesson/intermediate" element={<Intermediate />} />
+          <Route path="akan/lesson/advanced" element={<Advanced />} />
+          <Route path="akan/exercise/vocab" element={<PracticeVocabs />} />
+          <Route path="akan/exercise/fillin" element={<FillinPractice />} />
+          <Route path="akan/exercise/sentence" element={<SentencePractice />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

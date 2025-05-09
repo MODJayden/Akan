@@ -40,7 +40,7 @@ const Lessons = () => {
       description: "Start with basic greetings and essential vocabulary",
       lessons: 12,
       icon: <BookOpen className="h-6 w-6" />,
-      nav: "/lesson/begginers",
+      nav: "/akan/language/beginners",
     },
     {
       title: "Intermediate",
@@ -48,7 +48,7 @@ const Lessons = () => {
       progress: 15,
       lessons: 8,
       icon: <Users className="h-6 w-6" />,
-      nav: "/lesson/intermediate",
+      nav: "/akan/lesson/intermediate",
     },
     {
       title: "Advanced",
@@ -56,7 +56,7 @@ const Lessons = () => {
       progress: 5,
       lessons: 5,
       icon: <Award className="h-6 w-6" />,
-      nav: "/lesson/advanced",
+      nav: "/akan/lesson/advanced",
     },
   ];
   const handleDownload = (content) => {
@@ -156,7 +156,7 @@ const Lessons = () => {
               connections. The common greeting "Ɛte sɛn?" (How is it?) is
               typically followed by responses about one's health and family.
             </p>
-            <Link to={"/lesson/intermediate"}>
+            <Link to={"/akan/lesson/intermediate"}>
               <Button variant="link" className="text-amber-600 p-0">
                 Learn more about Akan greetings
               </Button>
