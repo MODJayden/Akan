@@ -6,7 +6,7 @@ export const generateLesson = createAsyncThunk(
   async (formData, thunkAPI) => {
     try {
       const res = await axios.post(
-        "http://localhost:5500/api/lessons/generate",
+        `${import.meta.env.VITE_API_URL}/api/lessons/generate`,
         formData
       );
       return res?.data;
@@ -18,7 +18,7 @@ export const generateLesson = createAsyncThunk(
 
 export const getLesson = createAsyncThunk("/get/lessons", async () => {
   try {
-    const res = await axios.get("http://localhost:5500/api/lessons");
+    const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/lessons`);
 
     return res?.data;
   } catch (error) {

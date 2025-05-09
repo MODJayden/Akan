@@ -6,7 +6,7 @@ export const generateVocabs = createAsyncThunk(
   async ({ level }) => {
     try {
       const response = await axios.post(
-        "http://localhost:5500/api/exercise/createVocabs",
+        `${import.meta.env.VITE_API_URL}/api/exercise/createVocabs`,
         { level }
       );
       return response?.data;
@@ -20,7 +20,7 @@ export const generateVocabs = createAsyncThunk(
 export const getVocabs = createAsyncThunk("exercise/getVocabs", async () => {
   try {
     const response = await axios.get(
-      "http://localhost:5500/api/exercise/getVocabs"
+      `${import.meta.env.VITE_API_URL}/api/exercise/getVocabs`
     );
     return response?.data;
   } catch (error) {

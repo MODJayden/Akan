@@ -5,7 +5,7 @@ export const checkAuthStatus = createAsyncThunk(
   "auth/checkStatus",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get("http://localhost:5500/auth/login/success", {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/auth/login/success`, {
         withCredentials: true,
       });
       return response?.data;
@@ -20,7 +20,7 @@ export const loginWithGoogle = createAsyncThunk(
   "auth/googleLogin",
   async (_, { rejectWithValue }) => {
     try {
-      window.location.href = `http://localhost:5500/auth/google`;
+      window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
     } catch (error) {
       return rejectWithValue(error.message);
       console.log(error);
@@ -105,3 +105,4 @@ const authSlice = createSlice({
 });
 
 export default authSlice.reducer;
+

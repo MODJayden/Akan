@@ -6,7 +6,7 @@ export const generateFillIn = createAsyncThunk(
   async ({level}) => {
     try {
       const response = await axios.post(
-        "http://localhost:5500/api/exercise/createFillInTheBlank",
+        `${import.meta.env.VITE_API_URL}/api/exercise/createFillInTheBlank`,
         {level}
       );
       return response?.data;
@@ -19,7 +19,7 @@ export const generateFillIn = createAsyncThunk(
 
 export const getFillIns = createAsyncThunk("exercise/getFillIns", async () => {
   try {
-    const response = await axios.get("http://localhost:5500/api/exercise/getFillInTheBlank");
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/exercise/getFillInTheBlank`);
     return response?.data;
   } catch (error) {
     console.error("Error fetching fill in exercises:", error);

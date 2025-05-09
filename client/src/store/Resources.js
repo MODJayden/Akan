@@ -7,7 +7,7 @@ export const generateResource = createAsyncThunk(
   async ({topic}) => {
     try {
       const res = await axios.post(
-        "http://localhost:5500/api/resources/resource/generate", 
+        `${import.meta.env.VITE_API_URL}/api/resources/resource/generate`, 
         {topic}    
       );
       return res?.data;
@@ -24,7 +24,7 @@ export const getResources = createAsyncThunk(
   "resources/getResources",
   async (_, thunkAPI) => { 
     try {
-      const res = await axios.get("http://localhost:5500/api/resources/resource/get"); // Assuming this endpoint for fetching resources
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/resources/resource/get`); // Assuming this endpoint for fetching resources
       return res?.data;
     } catch (error) {
       // It's good practice to reject with value for error handling in reducers
@@ -41,7 +41,7 @@ export const updateResource = createAsyncThunk(
   async ({ id, resourceData }, thunkAPI) => {
     try {
       const res = await axios.put(
-        `http://localhost:5500/api/resources/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/resources/${id}`,
         resourceData
       );
       return res?.data;
@@ -58,7 +58,7 @@ export const deleteResource = createAsyncThunk(
   "resources/deleteResource",
   async (id, thunkAPI) => {
     try {
-      await axios.delete(`http://localhost:5500/api/resources/${id}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/resources/${id}`);
       return id; // Return the id to identify which resource was deleted
     } catch (error) {
       return thunkAPI.rejectWithValue(

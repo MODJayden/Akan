@@ -6,7 +6,7 @@ export const generateSentence = createAsyncThunk(
   async ({level}) => {
     try {
       const response = await axios.post(
-        "http://localhost:5500/api/exercise/createSentence",
+        `${import.meta.env.VITE_API_URL}/api/exercise/createSentence`,
         {level}
       );
       return response?.data;
@@ -21,7 +21,7 @@ export const getSentences = createAsyncThunk(
   "exercise/getSentences",
   async () => {
     try {
-      const response = await axios.get("http://localhost:5500/api/exercise/getSentences");
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/exercise/getSentences`);
       return response?.data;
     } catch (error) {
       console.error("Error fetching sentence exercises:", error);
