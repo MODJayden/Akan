@@ -9,6 +9,8 @@ const authRouter = require("./Router/auth");
 const lessonsRouter = require("./Router/lessons");
 const resourcesRouter = require("./Router/Resources");
 const excerciseRouter = require("./Router/Excersice");
+const path = require('path');
+
 
 connectDB();
 
@@ -41,6 +43,20 @@ app.use("/auth", authRouter);
 app.use("/api/lessons", lessonsRouter);
 app.use("/api/resources", resourcesRouter);
 app.use("/api/exercise", excerciseRouter);
+
+
+
+if (process.env.NODE_ENV === 'production') {
+  // Serve static files from the React app
+  app.use(express.static(path.join(__dirname, 'client/build')));
+
+  // Handle React routing, return all requests to React app
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+  });
+}
+
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
