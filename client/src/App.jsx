@@ -26,7 +26,7 @@ import Advanced from "./Pages/Advanced";
 import PracticeVocabs from "./Pages/PracticeVocabs";
 import FillinPractice from "./Pages/FillinPractice";
 import SentencePractice from "./Pages/SentencePractice";
-import Alphabets from "./Pages/admin/alphabets";
+import Alphabets from "./Pages/admin/Alphabets";
 
 const App = () => {
   const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
