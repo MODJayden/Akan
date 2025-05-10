@@ -64,6 +64,7 @@ const Pronunciation = () => {
         </p>
       </div>
 
+
       {/* Tabs */}
       <div className="flex border-b mb-8">
         <Button
