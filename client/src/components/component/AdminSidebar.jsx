@@ -56,10 +56,11 @@ const AdminSidebar = ({ mobileMenuOpen, toggleMobileMenu,setMobileMenuOpen }) =>
           icon: <Upload size={16} />,
         },
         {
-          title: "Manage Resources",
-          path: "/resources",
-          icon: <FileText size={16} />,
+          title: "Upload Alphabets",
+          path: "/admin/resources/alphabets",
+          icon: <Upload size={16} />,
         },
+        
       ],
     },
     {

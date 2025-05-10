@@ -26,6 +26,7 @@ import Advanced from "./Pages/Advanced";
 import PracticeVocabs from "./Pages/PracticeVocabs";
 import FillinPractice from "./Pages/FillinPractice";
 import SentencePractice from "./Pages/SentencePractice";
+import Alphabets from "./Pages/admin/alphabets";
 
 const App = () => {
   const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
@@ -53,6 +54,7 @@ const App = () => {
           <Route path="lessons/upload" element={<UploadLessons />} />
           <Route path="excercises/upload" element={<UploadExcersice />} />
           <Route path="resources/upload" element={<Resources />} />
+          <Route path="resources/alphabets" element={<Alphabets />} />
         </Route>
         <Route
           path="/"

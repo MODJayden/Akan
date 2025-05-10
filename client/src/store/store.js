@@ -5,6 +5,7 @@ import resourceReducer from "./Resources"; // Added resource reducer
 import vocabsReducer from "./Exercise"; // Added exercise reducer
 import sentenceReducer from "./Sentence";
 import fillInReducer from "./Fillin";
+import alphabetReducer from "./Alphabet"; // Added alphabet reducer
 
 const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
     vocabs: vocabsReducer,
     sentence: sentenceReducer,
     fillIn: fillInReducer,
+    alphabet: alphabetReducer, // Added alphabet reducer
     // Added exercise reducer
   },
 });

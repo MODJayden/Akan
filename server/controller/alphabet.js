@@ -2,21 +2,26 @@ const Alphabet = require("../Model/alphabet");
 
 const createAlphabet = async (req, res) => {
   try {
-    const { alphabet, sound, example, audioUrl } = req.body;
-    if (!alphabet || !sound || !example || !audioUrl) {
+    const { letter, sound, example, audioUrl } = req.body;
+
+    if (!letter || !sound || !example || !audioUrl) {
       return res.status(400).json({
         message: "Missing required fields",
       });
     }
     const newAlphabet = await Alphabet.create({
-      alphabet,
+      letter,
       sound,
       example,
       audioUrl,
     });
     res
       .status(201)
-      .json({ message: "Alphabet created successfully", data: newAlphabet });
+      .json({
+        message: "Alphabet created successfully",
+        data: newAlphabet,
+        success: true,
+      });
   } catch (error) {
     res
       .status(500)

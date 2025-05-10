@@ -3,9 +3,9 @@ const multer = require("multer");
 
 // Configure Cloudinary
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: process.env.API_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
   secure: true,
 });
 
@@ -69,6 +69,7 @@ const handleUploadAudio = async (req, res, next) => {
         message: "No audio file provided",
       });
     }
+    console.log(req.file);
 
     const { success, result, message, error } = await uploadToCloudinary(
       req.file
@@ -89,7 +90,10 @@ const handleUploadAudio = async (req, res, next) => {
         publicId: result.public_id,
         duration: result.duration,
       },
+      
     });
+
+    next();
   } catch (error) {
     next(error);
   }

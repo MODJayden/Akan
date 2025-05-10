@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Headphones,
   Volume2,
@@ -14,34 +14,16 @@ import {
   CollapsibleTrigger,
   CollapsibleContent,
 } from "@/components/ui/collapsible";
+import { getAlphabets } from "@/store/Alphabet";
+import { useDispatch, useSelector } from "react-redux";
 
 const Pronunciation = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeTab, setActiveTab] = useState("alphabet");
+  const { alphabets } = useSelector((state) => state.alphabet);
+  const [audioPlaying, setAudioPlaying] = useState(null);
 
-  const alphabet = [
-    { letter: "A", sound: "a as in 'father'", example: "Aban (fortress)" },
-    { letter: "B", sound: "b as in 'boy'", example: "Bere (time)" },
-    { letter: "D", sound: "d as in 'dog'", example: "Dua (tree)" },
-    { letter: "E", sound: "e as in 'egg'", example: "Efie (home)" },
-    { letter: "Ɛ", sound: "e as in 'bet'", example: "Ɛka (loan)" },
-    { letter: "F", sound: "f as in 'fish'", example: "Fufu (pounded cassava)" },
-    { letter: "G", sound: "g as in 'go'", example: "Gye (take)" },
-    { letter: "H", sound: "h as in 'house'", example: "Hwɛ (look)" },
-    { letter: "I", sound: "i as in 'machine'", example: "Ibi (here)" },
-    { letter: "K", sound: "k as in 'kite'", example: "Kɔkɔɔ (red)" },
-    { letter: "M", sound: "m as in 'man'", example: "Me (I)" },
-    { letter: "N", sound: "n as in 'no'", example: "Nsuo (water)" },
-    { letter: "O", sound: "o as in 'or'", example: "Obi (someone)" },
-    { letter: "Ɔ", sound: "o as in 'pot'", example: "kɔm (hunger)" },
-    { letter: "P", sound: "p as in 'pot'", example: "Pɛ (want)" },
-    { letter: "R", sound: "r as in 'red'", example: "Rɔbɔ (work)" },
-    { letter: "S", sound: "s as in 'sun'", example: "Sika (money)" },
-    { letter: "T", sound: "t as in 'top'", example: "Tumi (power)" },
-    { letter: "U", sound: "u as in 'rule'", example: "Uwu (death)" },
-    { letter: "W", sound: "w as in 'we'", example: "Wɔn (they)" },
-    { letter: "Y", sound: "y as in 'yes'", example: "Yɛ (do)" },
-  ];
+  
 
   const commonPhrases = [
     { phrase: "Ɛte sɛn?", meaning: "How are you?", audio: "" },
@@ -57,6 +39,19 @@ const Pronunciation = () => {
       audio: "",
     },
   ];
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(getAlphabets());
+  }, [dispatch]);
+
+  const playAudio = (audioUrl) => {
+    if (audioPlaying === audioUrl) {
+      setAudioPlaying(null);
+    } else {
+      setAudioPlaying(audioUrl);
+      new Audio(audioUrl).play();
+    }
+  };
 
   return (
     <div className="container py-12 px-4 sm:px-6 lg:px-8">
@@ -82,47 +77,37 @@ const Pronunciation = () => {
         >
           <Headphones className="h-5 w-5 mr-2" /> Alphabet
         </Button>
-        <Button
-          variant="ghost"
-          className={`rounded-none border-b-2 ${
-            activeTab === "phrases"
-              ? "border-amber-600 text-amber-900"
-              : "border-transparent"
-          }`}
-          onClick={() => setActiveTab("phrases")}
-        >
-          <Mic className="h-5 w-5 mr-2" /> Common Phrases
-        </Button>
       </div>
 
       {/* Alphabet Tab */}
       {activeTab === "alphabet" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {alphabet.map((letter, index) => (
-            <Card key={index} className="hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-3xl">{letter.letter}</CardTitle>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setIsPlaying(!isPlaying)}
-                >
-                  {isPlaying ? (
-                    <Pause className="h-4 w-4" />
-                  ) : (
-                    <Play className="h-4 w-4" />
-                  )}
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-2">{letter.sound}</p>
-                <p className="font-medium">
-                  Example:{" "}
-                  <span className="text-amber-600">{letter.example}</span>
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+          {Array.isArray(alphabets) &&
+            alphabets?.map((letter, index) => (
+              <Card key={index} className="hover:shadow-md transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="text-3xl">{letter.letter}</CardTitle>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => playAudio(letter.audioUrl)}
+                  >
+                    {audioPlaying === letter.audioUrl ? (
+                      <Pause className="h-4 w-4" />
+                    ) : (
+                      <Play className="h-4 w-4" />
+                    )}
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground mb-2">{letter.sound}</p>
+                  <p className="font-medium">
+                    Example:{" "}
+                    <span className="text-amber-600">{letter.example}</span>
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
         </div>
       )}
 
