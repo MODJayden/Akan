@@ -27,6 +27,8 @@ import PracticeVocabs from "./Pages/PracticeVocabs";
 import FillinPractice from "./Pages/FillinPractice";
 import SentencePractice from "./Pages/SentencePractice";
 import Alphabets from "./Pages/admin/Alphabets";
+import Phrases from "./Pages/admin/Phrases";
+import UploadCulture from "./Pages/admin/UploadCulture";
 
 const App = () => {
   const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
@@ -55,6 +57,8 @@ const App = () => {
           <Route path="excercises/upload" element={<UploadExcersice />} />
           <Route path="resources/upload" element={<Resources />} />
           <Route path="resources/alphabets" element={<Alphabets />} />
+          <Route path="resources/phrases" element={<Phrases />} />  
+          <Route path="resources/culture/upload" element={<UploadCulture />} />
         </Route>
         <Route
           path="/"

@@ -11,6 +11,8 @@ const resourcesRouter = require("./Router/Resources");
 const excerciseRouter = require("./Router/Excersice");
 const cloudinaryRouter = require("./Router/cloudinary");
 const alphabetRouter = require("./Router/alphabet");
+const phrasesRouter = require("./Router/Phrases");
+const cultureRouter = require("./Router/culture"); // Added culture router
 const path = require("path");
 
 connectDB();
@@ -46,6 +48,8 @@ app.use("/api/resources", resourcesRouter);
 app.use("/api/exercise", excerciseRouter);
 app.use("/api/cloudinary", cloudinaryRouter);
 app.use("/api/alphabet", alphabetRouter);
+app.use("/api/phrases", phrasesRouter);
+app.use("/api/culture", cultureRouter); // Added culture route
 
 if (process.env.NODE_ENV === "production") {
   // Serve static files from the React app

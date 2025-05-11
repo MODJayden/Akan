@@ -1,4 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  createCultureByAdmin,
+  getCultures,
+  uploadFile,
+  updateCulture,
+} from "@/store/Culture";
 import {
   PlusCircle,
   Trash2,
@@ -13,42 +20,25 @@ import {
   Clock,
   ThumbsUp,
   ThumbsDown,
-  Search,
-  Plus,
-  Badge,
-  ChevronRight,
   Upload,
-  Map,
+  Edit,
   User,
 } from "lucide-react";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {
   Sheet,
-  SheetTrigger,
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
+  SheetTrigger,
 } from "@/components/ui/sheet";
 import {
-  createCultureByAdmin,
-  getCultures,
-  createCultureByUser,
-  uploadFile,
-} from "@/store/Culture";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -57,17 +47,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
-const Culture = () => {
-  const [activeTab, setActiveTab] = useState("traditions");
-  const [uploadOpen, setUploadOpen] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [openSheet, setOpenSheet] = useState(false);
-  const { isAuthenticated } = useSelector((state) => state.auth);
+const UploadCulture = () => {
   const dispatch = useDispatch();
   const { cultures, isLoading, error } = useSelector((state) => state.culture);
   const { user } = useSelector((state) => state.auth);
+  const [openSheet, setOpenSheet] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [currentCulture, setCurrentCulture] = useState(null);
+  const [statusUpdate, setStatusUpdate] = useState("pending");
   const [isUploading, setIsUploading] = useState(false);
   const [file, setFile] = useState(null);
   const [formData, setFormData] = useState({
@@ -83,10 +74,6 @@ const Culture = () => {
     dispatch(getCultures());
   }, [dispatch]);
 
-  const filteredCultures = cultures?.filter(
-    (item) => item.status === "approved"
-  );
-
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
   };
@@ -94,6 +81,62 @@ const Culture = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  useEffect(() => {
+    if (file) {
+      setIsUploading(true);
+      const data = new FormData();
+      data.append("file", file);
+      dispatch(uploadFile(data)).then((res) => {
+        if (res?.payload?.success) {
+          setFormData({ ...formData, fileUrl: res?.payload?.data.url });
+          setIsUploading(false);
+        }
+      });
+    }
+  }, [file]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    dispatch(createCultureByAdmin(formData)).then((res) => {
+      if (res?.payload?.success) {
+        setFormData({
+          title: "",
+          category: "",
+          description: "",
+          fileType: "",
+          status: "pending",
+          user,
+        });
+        setOpenSheet(false);
+        setFile(null);
+        dispatch(getCultures());
+      }
+    });
+  };
+
+  const openStatusDialog = (culture) => {
+    setCurrentCulture(culture);
+    setStatusUpdate(culture.status);
+    setOpenDialog(true);
+  };
+
+  const handleStatusUpdate = () => {
+    if (!currentCulture) return;
+
+    dispatch(
+      updateCulture({
+        id: currentCulture._id,
+        status: statusUpdate,
+      })
+    ).then((res) => {
+      if (res?.payload?.success) {
+        console.log(res);
+        dispatch(getCultures());
+        setOpenDialog(false);
+      }
+    });
   };
 
   const getStatusIcon = (status) => {
@@ -180,60 +223,20 @@ const Culture = () => {
     "Folklore & Oral Traditions",
   ];
 
-  useEffect(() => {
-    if (file) {
-      setIsUploading(true);
-      const data = new FormData();
-      data.append("file", file);
-      dispatch(uploadFile(data)).then((res) => {
-        if (res?.payload?.success) {
-          setFormData({ ...formData, fileUrl: res?.payload?.data.url });
-          setIsUploading(false);
-        }
-      });
-    }
-  }, [file]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    dispatch(createCultureByUser(formData)).then((res) => {
-      if (res?.payload?.success) {
-        setFormData({
-          title: "",
-          category: "",
-          description: "",
-          fileType: "",
-          status: "pending",
-          user,
-        });
-        setOpenSheet(false);
-        setFile(null);
-        dispatch(getCultures());
-      }
-    });
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
-      {/* Main Content */}
-      <div className="container py-12 px-4 sm:px-6 lg:px-8">
-        {/* Search and Upload */}
-        <div className="flex flex-col sm:flex-row justify-end items-end sm:items-center gap-4 mb-8">
+    <div className="min-h-screen p-4 sm:p-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <h1 className="text-xl md:text-3xl font-bold text-amber-900">
+            Cultural Content Management
+          </h1>
           <Sheet open={openSheet} onOpenChange={setOpenSheet}>
-            {isAuthenticated ? (
-              <SheetTrigger asChild>
-                <Button className="bg-amber-600 hover:bg-amber-700">
-                  <Upload className="h-4 w-4 mr-2" /> Share Your Content
-                </Button>
-              </SheetTrigger>
-            ) : (
+            <SheetTrigger asChild>
               <Button className="bg-amber-600 hover:bg-amber-700">
-                <Link to="/login" className="flex justify-center items-center">
-                  <Upload className="h-4 w-4 mr-2" /> Share Your Content
-                </Link>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Cultural Content
               </Button>
-            )}
-
+            </SheetTrigger>
             <SheetContent side="right" className="w-full sm:w-[500px]">
               <SheetHeader>
                 <SheetTitle className="text-amber-900">
@@ -390,136 +393,150 @@ const Culture = () => {
           </Sheet>
         </div>
 
-        {/* Content Grid */}
-        <div className="min-h-screen p-4 sm:p-6">
-          <div className="max-w-6xl mx-auto">
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                {error}
-              </div>
-            )}
-
-            {isLoading && filteredCultures?.length === 0 ? (
-              <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500"></div>
-              </div>
-            ) : filteredCultures?.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-md p-8 text-center">
-                <p className="text-amber-700 text-lg">
-                  No cultural content uploaded yet. Click "Add Cultural Content"
-                  to get started.
-                </p>
-              </div>
-            ) : (
-              <Tabs defaultValue={categories[0]} className="w-full mb-8">
-                <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6 mb-6">
-                  {categories.map((category) => (
-                    <TabsTrigger key={category} value={category}>
-                      {category.split(" & ")[0]}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-
-                {categories.map((category) => (
-                  <TabsContent key={category} value={category}>
-                    <div className="grid pt-8 grid-cols-1 md:grid-cols-2 md:pt-4 lg:grid-cols-3 gap-6 lg:pt-4">
-                      {filteredCultures
-                        .filter((culture) => culture.category === category)
-                        .map((culture) => (
-                          <Card
-                            key={culture._id}
-                            className="hover:shadow-lg transition-shadow h-full flex flex-col"
-                          >
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                              <CardTitle className="text-lg font-bold text-amber-900">
-                                {culture.title}
-                              </CardTitle>
-                              <div className="flex items-center gap-2">
-                                {getFileTypeIcon(culture.fileType)}
-                                {getStatusIcon(culture.status)}
-                              </div>
-                            </CardHeader>
-                            <CardContent className="flex-grow">
-                              <p className="text-sm text-gray-600 mb-3">
-                                {culture.description}
-                              </p>
-
-                              {renderMediaContent(culture)}
-
-                              {/* Contributor Information */}
-                              <div className="mt-3 flex items-center gap-2 text-sm text-amber-600">
-                                <User className="h-4 w-4" />
-                                <span>
-                                  {culture.user?.name ||
-                                    "Anonymous Contributor"}
-                                </span>
-                              </div>
-
-                              <div className="mt-4 flex items-center justify-between">
-                                <Badge
-                                  variant="outline"
-                                  className="text-amber-600"
-                                >
-                                  {culture.fileType}
-                                </Badge>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                    </div>
-                  </TabsContent>
-                ))}
-              </Tabs>
-            )}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            {error}
           </div>
-        </div>
+        )}
 
-        {/* User Contributions Section */}
-        <div className="mt-12">
-          {/* Horizontal scrolling container */}
-          <div className="mt-12">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-amber-900">
-                Community Contributors
-              </h2>
-              <Button variant="ghost" className="text-amber-600">
-                View All <ChevronRight className="h-4 w-4 ml-1" />
+        {isLoading && cultures.length === 0 ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500"></div>
+          </div>
+        ) : cultures.length === 0 ? (
+          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+            <p className="text-amber-700 text-lg">
+              No cultural content uploaded yet. Click "Add Cultural Content" to
+              get started.
+            </p>
+          </div>
+        ) : (
+          <Tabs defaultValue={categories[0]} className="w-full mb-8">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6 mb-6">
+              {categories.map((category) => (
+                <TabsTrigger key={category} value={category}>
+                  {category.split(" & ")[0]}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            {categories.map((category) => (
+              <TabsContent key={category} value={category}>
+                <div className="grid pt-8 grid-cols-1 md:grid-cols-2 md:pt-4 lg:grid-cols-3 gap-6 lg:pt-4">
+                  {cultures
+                    .filter((culture) => culture.category === category)
+                    .map((culture) => (
+                      <Card
+                        key={culture._id}
+                        className="hover:shadow-lg transition-shadow h-full flex flex-col"
+                      >
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                          <CardTitle className="text-lg font-bold text-amber-900">
+                            {culture.title}
+                          </CardTitle>
+                          <div className="flex items-center gap-2">
+                            {getFileTypeIcon(culture.fileType)}
+                            {getStatusIcon(culture.status)}
+                          </div>
+                        </CardHeader>
+                        <CardContent className="flex-grow">
+                          <p className="text-sm text-gray-600 mb-3">
+                            {culture.description}
+                          </p>
+
+                          {renderMediaContent(culture)}
+                          <div className="mt-3 flex items-center gap-2 text-sm text-amber-600">
+                            <User className="h-4 w-4" />
+                            <span>
+                              {culture.user?.name || "Anonymous Contributor"}
+                            </span>
+                          </div>
+
+                          <div className="mt-4 flex items-center justify-between">
+                            <Badge variant="outline" className="text-amber-600">
+                              {culture.fileType}
+                            </Badge>
+                            <div className="flex gap-2">
+                              {culture.status === "pending" && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-amber-600 hover:text-amber-800"
+                                  onClick={() => openStatusDialog(culture)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              )}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-600 hover:text-red-800"
+                                onClick={() => {
+                                  if (
+                                    confirm(
+                                      "Are you sure you want to delete this item?"
+                                    )
+                                  ) {
+                                    // Add delete functionality here
+                                  }
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                </div>
+              </TabsContent>
+            ))}
+          </Tabs>
+        )}
+
+        {/* Status Update Dialog */}
+        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Update Content Status</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div>
+                <Label className="text-amber-800">Current Status</Label>
+                <div className="mt-1 flex items-center gap-2">
+                  {getStatusIcon(currentCulture?.status)}
+                  <span className="capitalize">{currentCulture?.status}</span>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="status" className="text-amber-800">
+                  New Status
+                </Label>
+                <Select value={statusUpdate} onValueChange={setStatusUpdate}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button
+                onClick={handleStatusUpdate}
+                className="w-full bg-amber-600 hover:bg-amber-700 mt-4"
+                disabled={isLoading}
+              >
+                {isLoading ? "Updating..." : "Update Status"}
               </Button>
             </div>
-
-            {/* Auto-scrolling carousel container */}
-            <div className="relative overflow-hidden">
-              {/* Moving cards */}
-              <div className="animate-marquee whitespace-nowrap">
-                {[...filteredCultures, ...filteredCultures].map(
-                  (culture, index) => (
-                    <div
-                      key={`${culture._id}-${index}`}
-                      className="inline-block mx-3 bg-white rounded-lg shadow-sm p-4 w-48"
-                    >
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center mr-3">
-                          <User className="h-5 w-5 text-amber-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-amber-900 truncate">
-                            {culture.user?.name || "Anonymous"}
-                          </p>
-                          <p className="text-xs text-amber-600 capitalize">
-                            {culture.category.split(" & ")[0].toLowerCase()}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
 };
 
-export default Culture;
+export default UploadCulture;

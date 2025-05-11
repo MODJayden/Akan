@@ -60,6 +60,16 @@ const AdminSidebar = ({ mobileMenuOpen, toggleMobileMenu,setMobileMenuOpen }) =>
           path: "/admin/resources/alphabets",
           icon: <Upload size={16} />,
         },
+        {
+          title: "Upload Phrases",
+          path: "/admin/resources/phrases",
+          icon: <Upload size={16} />,
+        },
+        {
+          title: "Upload Culture",
+          path: "/admin/resources/culture/upload",
+          icon: <Upload size={16} />,
+        },
         
       ],
     },

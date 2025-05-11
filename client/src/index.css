@@ -6,6 +6,21 @@
 body {
   font-family: "Space Grotesk", sans-serif;
 }
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 20s linear infinite;
+  display: inline-block;
+}
+
+@media (max-width: 640px) {
+  .animate-marquee {
+    animation-duration: 30s;
+  }
+}
 
 @custom-variant dark (&:is(.dark *));
 
