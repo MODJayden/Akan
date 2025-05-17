@@ -14,12 +14,16 @@ import {
   Menu,
   X,
   LogOut,
-  Gem
+  Gem,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { useDispatch } from "react-redux";
 import { logoutUser } from "@/store/auth";
-const AdminSidebar = ({ mobileMenuOpen, toggleMobileMenu,setMobileMenuOpen }) => {
+const AdminSidebar = ({
+  mobileMenuOpen,
+  toggleMobileMenu,
+  setMobileMenuOpen,
+}) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -70,7 +74,6 @@ const AdminSidebar = ({ mobileMenuOpen, toggleMobileMenu,setMobileMenuOpen }) =>
           path: "/admin/resources/culture/upload",
           icon: <Upload size={16} />,
         },
-        
       ],
     },
     {
@@ -79,12 +82,12 @@ const AdminSidebar = ({ mobileMenuOpen, toggleMobileMenu,setMobileMenuOpen }) =>
       subItems: [
         {
           title: "Add Words",
-          path: "/dictionary/add",
+          path: "/admin/dictionary/admin",
           icon: <Upload size={16} />,
         },
         {
           title: "Review Dictionary",
-          path: "/dictionary",
+          path: "/admin/dictionary/review",
           icon: <Eye size={16} />,
         },
       ],
@@ -95,42 +98,14 @@ const AdminSidebar = ({ mobileMenuOpen, toggleMobileMenu,setMobileMenuOpen }) =>
       subItems: [
         {
           title: "Upload Documents",
-          path: "/history/upload",
+          path: "/admin/history/add",
           icon: <Upload size={16} />,
         },
         {
           title: "Review Documents",
-          path: "/history",
+          path: "/admin/history/review",
           icon: <Eye size={16} />,
         },
-      ],
-    },
-    {
-      title: "Linguistics",
-      icon: <Languages size={18} />,
-      subItems: [
-        {
-          title: "Upload Analysis",
-          path: "/linguistics/upload",
-          icon: <Upload size={16} />,
-        },
-        {
-          title: "Review Analysis",
-          path: "/linguistics",
-          icon: <Eye size={16} />,
-        },
-      ],
-    },
-    {
-      title: "Cultural Studies",
-      icon: <Landmark size={18} />,
-      subItems: [
-        {
-          title: "Upload Studies",
-          path: "/culture/upload",
-          icon: <Upload size={16} />,
-        },
-        { title: "Review Studies", path: "/culture", icon: <Eye size={16} /> },
       ],
     },
   ];

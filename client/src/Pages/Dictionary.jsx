@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   Search,
   Volume2,
@@ -13,6 +14,7 @@ import {
   Check,
   X,
   Star,
+  Pause,
 } from "lucide-react";
 import {
   Card,
@@ -40,90 +42,65 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
+import { createWordByUser, getDictionaryEntries } from "@/store/Dictionary";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { getPhrases } from "@/store/Phrases";
 
 const Dictionary = () => {
+  const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("twi");
   const [savedWords, setSavedWords] = useState(() => {
     const storedWords = localStorage.getItem("savedWords");
     return storedWords ? JSON.parse(storedWords) : [];
   });
-
+  const [savedPhrases, setSavedPhrases] = useState(() => {
+    const storedPhrases = localStorage.getItem("savedPhrases");
+    return storedPhrases ? JSON.parse(storedPhrases) : [];
+  });
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [selectedWord, setSelectedWord] = useState(null);
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { isLoading, entries } = useSelector((state) => state.dictionary);
+  const [audioPlaying, setAudioPlaying] = useState(null);
+  const { phrases } = useSelector((state) => state.phrase);  
+  const [formData, setFormData] = useState({
+    twi: "",
+    english: "",
+    definition: "",
+    partOfSpeech: "noun",
+    examples: { twi: "", english: "" },
+    status: "pending",
+    user: user?._id,
+  });
 
-  // Mock dictionary data
-  const dictionaryEntries = [
-    {
-      id: 1,
-      twi: "Akwaaba",
-      fante: "Akwaaba",
-      english: "Welcome",
-      pronunciation: "/a-kwaa-ba/",
-      etymology: "From 'akwa' (to receive) + 'aba' (visitors)",
-      partOfSpeech: "interjection",
-      examples: [
-        {
-          twi: "Akwaaba wo fie!",
-          english: "Welcome to our home!",
-          dialect: "Twi",
-        },
-        {
-          twi: "Akwaaba wɔ Ghana!",
-          english: "Welcome to Ghana!",
-          dialect: "Fante",
-        },
-      ],
-      related: ["Ɛte sɛn?", "Meda wo ase"],
-      adinkra: "Sankofa",
-    },
-    {
-      id: 2,
-      twi: "Nsuo",
-      fante: "Nsu",
-      english: "Water",
-      pronunciation: "/n-su-o/",
-      etymology: "Proto-Bantu '*-jijʊ̀",
-      partOfSpeech: "noun",
-      examples: [
-        {
-          twi: "Mepɛ sɛ mema nsuo",
-          english: "I want to drink water",
-          dialect: "Twi",
-        },
-      ],
-      related: ["Nsuom", "Nsuo tɔn"],
-      adinkra: "Nsaa",
-    },
-    {
-      id: 3,
-      twi: "Ɛte sɛn?",
-      fante: "Ɛte sɛn?",
-      english: "How are you?",
-      pronunciation: "/eh-teh sen/",
-      partOfSpeech: "phrase",
-      examples: [
-        {
-          twi: "Ɛte sɛn? Me ho yɛ",
-          english: "How are you? I'm fine",
-          dialect: "Twi",
-        },
-      ],
-      related: ["Akwaaba", "Wo ho te sɛn?"],
-    },
-  ];
+  useEffect(() => {
+    dispatch(getDictionaryEntries());
+    dispatch(getPhrases());
+  }, [dispatch]);
+
+  const ApprovedEntries = entries?.filter(
+    (entry) => entry.status === "approved"
+  );
 
   // Filter entries based on search query
-  const filteredEntries = dictionaryEntries.filter(
+  const filteredEntries = ApprovedEntries.filter(
     (entry) =>
       entry.twi.toLowerCase().includes(searchQuery.toLowerCase()) ||
       entry.english.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      entry.fante.toLowerCase().includes(searchQuery.toLowerCase())
+      (entry.fante &&
+        entry.fante.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   // Mock upload simulation
@@ -140,7 +117,14 @@ const Dictionary = () => {
     }, 300);
   };
 
-  //remove saved word
+  // Remove saved word
+  const removeSavedPhrase = (wordToRemove) => {
+    const updatedSavedWords = savedPhrases.filter(
+      (word) => word !== wordToRemove
+    );
+    setSavedPhrases(updatedSavedWords);
+    localStorage.setItem("savedPhrases", JSON.stringify(updatedSavedWords));
+  };
   const removeSavedWord = (wordToRemove) => {
     const updatedSavedWords = savedWords.filter(
       (word) => word !== wordToRemove
@@ -151,15 +135,70 @@ const Dictionary = () => {
 
   // Toggle saved word
   const toggleSavedWord = (word) => {
-    const updatedSavedWords = [...savedWords, word];
+    const isSaved = savedWords.includes(word);
+    const updatedSavedWords = isSaved
+      ? savedWords.filter((w) => w !== word)
+      : [...savedWords, word];
     setSavedWords(updatedSavedWords);
     localStorage.setItem("savedWords", JSON.stringify(updatedSavedWords));
   };
+  const toggleSavedPhrase = (word) => {
+    const isSaved = savedPhrases.includes(word);
+    const updatedSavedWords = isSaved
+      ? savedWords.filter((w) => w !== word)
+      : [...savedPhrases, word];
+    setSavedPhrases(updatedSavedWords);
+    localStorage.setItem("savedPhrases", JSON.stringify(updatedSavedWords));
+  };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleExampleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      examples: { ...prev.examples, [name]: value },
+    }));
+  };
+
+  const handleSelectChange = (name, value) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(createWordByUser(formData)).then((res) => {
+      if (res.payload?.success) {
+        toast.success("Entry created");
+        dispatch(getDictionaryEntries());
+      }
+    });
+  };
+
+  const playAudio = (audioUrl) => {
+    if (audioPlaying === audioUrl) {
+      setAudioPlaying(null);
+    } else {
+      setAudioPlaying(audioUrl);
+      new Audio(audioUrl).play();
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500 mx-auto mb-4"></div>
+          <p className="text-amber-700">Loading dictionary...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
-       
-
+    <div className="min-h-screen   ">
       {/* Main Content */}
       <div className="container py-12 px-4 sm:px-6 lg:px-8">
         {/* Search Section */}
@@ -215,13 +254,13 @@ const Dictionary = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Adinkra Symbol
+                    Status
                   </label>
                   <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                    <option value="">All Symbols</option>
-                    <option value="sankofa">Sankofa</option>
-                    <option value="gye_nyame">Gye Nyame</option>
-                    <option value="nsaa">Nsaa</option>
+                    <option value="">All Statuses</option>
+                    <option value="approved">Approved</option>
+                    <option value="pending">Pending</option>
+                    <option value="rejected">Rejected</option>
                   </select>
                 </div>
               </div>
@@ -245,14 +284,16 @@ const Dictionary = () => {
             {filteredEntries.length > 0 ? (
               filteredEntries.map((entry) => (
                 <Card
-                  key={entry.id}
+                  key={entry._id}
                   className={`hover:shadow-md transition-shadow ${
-                    selectedWord === entry.id
+                    selectedWord === entry._id
                       ? "border-amber-300 bg-amber-50"
                       : ""
                   }`}
                   onClick={() =>
-                    setSelectedWord(entry.id === selectedWord ? null : entry.id)
+                    setSelectedWord(
+                      entry._id === selectedWord ? null : entry._id
+                    )
                   }
                 >
                   <CardHeader className="pb-3">
@@ -260,7 +301,9 @@ const Dictionary = () => {
                       <div>
                         <CardTitle className="text-xl">
                           {entry.twi}{" "}
-                          {entry.fante !== entry.twi && `(${entry.fante})`}
+                          {entry.fante &&
+                            entry.fante !== entry.twi &&
+                            `(${entry.fante})`}
                         </CardTitle>
                         <CardDescription className="text-lg">
                           {entry.english}
@@ -286,45 +329,39 @@ const Dictionary = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2 mb-3">
-                      <Badge variant="outline" className="text-amber-600">
+                      <Badge
+                        variant="outline"
+                        className="text-amber-600 capitalize"
+                      >
                         {entry.partOfSpeech}
                       </Badge>
                       <Badge variant="outline">
                         <Volume2 className="h-3 w-3 mr-1" />{" "}
                         {entry.pronunciation}
                       </Badge>
-                      {entry.adinkra && (
-                        <Badge
-                          variant="outline"
-                          className="bg-amber-100 text-amber-800"
-                        >
-                          {entry.adinkra} symbol
-                        </Badge>
-                      )}
+                      <Badge
+                        variant="outline"
+                        className={
+                          entry.status === "approved"
+                            ? "bg-green-100 text-green-800"
+                            : entry.status === "pending"
+                            ? "bg-amber-100 text-amber-800"
+                            : "bg-red-100 text-red-800"
+                        }
+                      >
+                        {entry.status}
+                      </Badge>
                     </div>
 
-                    {selectedWord === entry.id && (
+                    {selectedWord === entry._id && (
                       <div className="space-y-4 mt-4">
-                        {/* Etymology */}
-                        {entry.etymology && (
-                          <div>
-                            <h4 className="font-medium mb-1 flex items-center">
-                              <Info className="h-4 w-4 mr-2 text-amber-600" />{" "}
-                              Etymology
-                            </h4>
-                            <p className="text-sm text-muted-foreground">
-                              {entry.etymology}
-                            </p>
-                          </div>
-                        )}
-
                         {/* Examples */}
                         <div>
                           <h4 className="font-medium mb-2">Examples</h4>
                           <div className="space-y-3">
                             {entry.examples.map((example, idx) => (
                               <div
-                                key={idx}
+                                key={example._id || idx}
                                 className="bg-amber-50 rounded-lg p-3"
                               >
                                 <div className="flex justify-between items-start">
@@ -341,9 +378,6 @@ const Dictionary = () => {
                                   >
                                     <Play className="h-4 w-4" />
                                   </Button>
-                                </div>
-                                <div className="text-xs text-amber-600 mt-1">
-                                  {example.dialect} dialect
                                 </div>
                               </div>
                             ))}
@@ -409,61 +443,147 @@ const Dictionary = () => {
                           </p>
                         </SheetHeader>
 
-                        <div className="grid gap-4 py-4">
-                          <div className="space-y-2">
-                            <label className="block text-sm font-medium">
-                              Word (Twi)
-                            </label>
-                            <Input placeholder="Enter the word in Twi" />
-                          </div>
+                        <form
+                          onSubmit={handleSubmit}
+                          className="space-y-6 max-w-2xl mx-auto"
+                        >
+                          <div className="grid gap-4">
+                            <div className="grid gap-2">
+                              <Label htmlFor="twi">Twi Word</Label>
+                              <Input
+                                id="twi"
+                                name="twi"
+                                value={formData.twi}
+                                onChange={handleChange}
+                                placeholder="Enter word in Twi"
+                                required
+                              />
+                            </div>
 
-                          <div className="space-y-2">
-                            <label className="block text-sm font-medium">
-                              Word (Fante)
-                            </label>
-                            <Input placeholder="Enter the word in Fante" />
-                          </div>
+                            <div className="grid gap-2">
+                              <Label htmlFor="english">English Word</Label>
+                              <Input
+                                id="english"
+                                name="english"
+                                value={formData.english}
+                                onChange={handleChange}
+                                placeholder="Enter word in English"
+                                required
+                              />
+                            </div>
 
-                          <div className="space-y-2">
-                            <label className="block text-sm font-medium">
-                              English Meaning
-                            </label>
-                            <Input placeholder="Enter the English translation" />
-                          </div>
+                            <div className="grid gap-2">
+                              <Label htmlFor="definition">Definition</Label>
+                              <Input
+                                id="definition"
+                                name="definition"
+                                value={formData.definition}
+                                onChange={handleChange}
+                                placeholder="Enter definition"
+                                required
+                              />
+                            </div>
 
-                          <div className="space-y-2">
-                            <label className="block text-sm font-medium">
-                              Pronunciation
-                            </label>
-                            <Input placeholder="Example: /a-kwaa-ba/" />
-                          </div>
+                            <div className="grid gap-2">
+                              <Label htmlFor="partOfSpeech">
+                                Part of Speech
+                              </Label>
+                              <Select
+                                value={formData.partOfSpeech}
+                                onValueChange={(value) =>
+                                  handleSelectChange("partOfSpeech", value)
+                                }
+                              >
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder="Select part of speech" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="interjection">
+                                    Interjection
+                                  </SelectItem>
+                                  <SelectItem value="noun">Noun</SelectItem>
+                                  <SelectItem value="verb">Verb</SelectItem>
+                                  <SelectItem value="adjective">
+                                    Adjective
+                                  </SelectItem>
+                                  <SelectItem value="adverb">Adverb</SelectItem>
+                                  <SelectItem value="pronoun">
+                                    Pronoun
+                                  </SelectItem>
+                                  <SelectItem value="preposition">
+                                    Preposition
+                                  </SelectItem>
+                                  <SelectItem value="conjunction">
+                                    Conjunction
+                                  </SelectItem>
+                                  <SelectItem value="determiner">
+                                    Determiner
+                                  </SelectItem>
+                                  <SelectItem value="numeral">
+                                    Numeral
+                                  </SelectItem>
+                                  <SelectItem value="phrase">Phrase</SelectItem>
+                                  <SelectItem value="idiom">Idiom</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
 
-                          <div className="space-y-2">
-                            <label className="block text-sm font-medium">
-                              Example Sentence
-                            </label>
-                            <textarea
-                              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[100px]"
-                              placeholder="Provide an example sentence in context..."
-                            />
-                          </div>
+                            <div className="grid gap-4 border p-4 rounded-lg">
+                              <h3 className="font-medium">Example</h3>
+                              <div className="grid gap-2">
+                                <Label htmlFor="example-twi">Twi Example</Label>
+                                <Input
+                                  id="example-twi"
+                                  name="twi"
+                                  value={formData.examples.twi}
+                                  onChange={handleExampleChange}
+                                  placeholder="Enter example in Twi"
+                                />
+                              </div>
+                              <div className="grid gap-2">
+                                <Label htmlFor="example-english">
+                                  English Example
+                                </Label>
+                                <Input
+                                  id="example-english"
+                                  name="english"
+                                  value={formData.examples.english}
+                                  onChange={handleExampleChange}
+                                  placeholder="Enter example in English"
+                                />
+                              </div>
+                            </div>
 
-                          <div className="space-y-2">
-                            <label className="block text-sm font-medium">
-                              Your Email (optional)
-                            </label>
-                            <Input placeholder="We'll contact you if we have questions" />
-                          </div>
-                        </div>
+                            <div className="grid gap-2">
+                              <Label htmlFor="status">Status</Label>
+                              <Select
+                                value={formData.status}
+                                onValueChange={(value) =>
+                                  handleSelectChange("status", value)
+                                }
+                              >
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder="Select status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="pending">
+                                    Pending
+                                  </SelectItem>
+                                  <SelectItem value="approved">
+                                    Approved
+                                  </SelectItem>
+                                  <SelectItem value="rejected">
+                                    Rejected
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
 
-                        <SheetFooter>
-                          <Button
-                            type="submit"
-                            className="w-full bg-amber-600 hover:bg-amber-700"
-                          >
-                            Submit Suggestion
-                          </Button>
-                        </SheetFooter>
+                            <Button type="submit" className="w-full mt-6">
+                              Submit
+                            </Button>
+                          </div>
+                        </form>
                       </div>
                     </SheetContent>
                   </Sheet>
@@ -517,26 +637,47 @@ const Dictionary = () => {
               )}
             </Card>
 
-            {/* Dialect Map */}
+            {/* Saved Phrase */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Map className="h-5 w-5 text-amber-600" /> Akan Dialect Map
+                  <Bookmark className="h-5 w-5 text-amber-600" /> Saved Phrases
                 </CardTitle>
-                <CardDescription>
-                  Regions where Akan languages are spoken
-                </CardDescription>
+                <CardDescription>Your personal vocabulary list</CardDescription>
               </CardHeader>
-              <CardContent className="h-48 bg-amber-50 rounded-lg flex items-center justify-center">
-                <p className="text-muted-foreground">
-                  Interactive map would appear here
-                </p>
+              <CardContent>
+                {savedPhrases.length > 0 ? (
+                  <div className="space-y-2">
+                    {savedPhrases.map((word, index) => (
+                      <div
+                        key={index}
+                        className="flex justify-between items-center p-2 hover:bg-amber-50 rounded"
+                      >
+                        <span>{word}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => removeSavedPhrase(word)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Save words by clicking the star icon
+                  </p>
+                )}
               </CardContent>
-              <CardFooter>
-                <Button variant="outline" className="w-full">
-                  Explore Map
-                </Button>
-              </CardFooter>
+              {savedWords.length > 0 && (
+                <CardFooter>
+                  <Button variant="outline" className="w-full">
+                    Create Practice List
+                  </Button>
+                </CardFooter>
+              )}
             </Card>
 
             {/* Common Phrases */}
@@ -547,54 +688,69 @@ const Dictionary = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {[
-                  { twi: "Ɛte sɛn?", english: "How are you?" },
-                  { twi: "Me ho yɛ", english: "I'm fine" },
-                  { twi: "Meda wo ase", english: "Thank you" },
-                  { twi: "Mepa wo kyɛw", english: "Please" },
-                ].map((phrase, index) => (
-                  <Collapsible key={index}>
-                    <div className="flex justify-between items-center p-2 hover:bg-amber-50 rounded">
-                      <div>
-                        <p className="font-medium">{phrase.twi}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {phrase.english}
-                        </p>
-                      </div>
-                      <CollapsibleTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <ChevronDown className="h-4 w-4" />
-                        </Button>
-                      </CollapsibleTrigger>
-                    </div>
-                    <CollapsibleContent className="px-2 pb-2">
-                      <div className="bg-amber-50 rounded-lg p-3 text-sm">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Button variant="outline" size="sm">
-                            <Play className="h-4 w-4 mr-2" /> Listen
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => toggleSavedWord(phrase.twi)}
-                          >
-                            <Star
-                              className={`h-4 w-4 mr-2 ${
-                                savedWords.includes(phrase.twi)
-                                  ? "fill-amber-500 text-amber-500"
-                                  : ""
-                              }`}
-                            />
-                            Save
-                          </Button>
+                {Array.isArray(phrases) && phrases.length > 0 ? (
+                  phrases.slice(0, 4).map((phrase) => (
+                    <Collapsible key={phrase._id}>
+                      <div className="flex justify-between items-center p-2 hover:bg-amber-50 rounded">
+                        <div>
+                          <p className="font-medium">{phrase.phrase}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {phrase.meaning}
+                          </p>
                         </div>
-                        <p className="text-muted-foreground">
-                          Pronunciation: /eh-teh sen/
-                        </p>
+                        <CollapsibleTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                          >
+                            <ChevronDown className="h-4 w-4" />
+                          </Button>
+                        </CollapsibleTrigger>
                       </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                ))}
+                      <CollapsibleContent className="px-2 pb-2">
+                        <div className="bg-amber-50 rounded-lg p-3 text-sm">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => playAudio(phrase.audioUrl)}
+                            >
+                              {audioPlaying === phrase.audioUrl ? (
+                                <Pause className="h-4 w-4" />
+                              ) : (
+                                <Play className="h-4 w-4" />
+                              )}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => toggleSavedPhrase(phrase.phrase)}
+                            >
+                              <Star
+                                className={`h-4 w-4 mr-2 ${
+                                  savedPhrases.includes(phrase.twi)
+                                    ? "fill-amber-500 text-amber-500"
+                                    : ""
+                                }`}
+                              />
+                              Save
+                            </Button>
+                          </div>
+                          {phrase.pronunciation && (
+                            <p className="text-muted-foreground">
+                              Pronunciation: {phrase.pronunciation}
+                            </p>
+                          )}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No phrases found
+                  </p>
+                )}
               </CardContent>
               <CardFooter>
                 <Button variant="outline" className="w-full">
@@ -602,6 +758,8 @@ const Dictionary = () => {
                 </Button>
               </CardFooter>
             </Card>
+
+            {/* Common Words */}
           </div>
         </div>
       </div>

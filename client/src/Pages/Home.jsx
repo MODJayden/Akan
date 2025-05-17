@@ -174,7 +174,7 @@ const Home = () => {
                 diaspora communities with their roots, and introducing the world
                 to the beauty of Akan traditions.
               </p>
-              <Link to="/research/cultural-studies">
+              <Link to="/research/history">
                 <Button
                   variant="outline"
                   className="border-amber-600 text-amber-700 hover:bg-amber-50"

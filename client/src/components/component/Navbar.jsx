@@ -109,16 +109,7 @@ const Navbar = () => {
           to: "/research/history",
           icon: <BookOpen className="h-4 w-4" />,
         },
-        {
-          title: "Linguistic Analysis",
-          to: "/research/linguistics",
-          icon: <Languages className="h-4 w-4" />,
-        },
-        {
-          title: "Cultural Studies",
-          to: "/research/cultural-studies",
-          icon: <Book className="h-4 w-4" />,
-        },
+       
       ],
     },
     {
@@ -270,24 +261,7 @@ const Navbar = () => {
                         Historical Documents
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link
-                        to="/research/linguistics"
-                        className="flex items-center gap-2 w-full"
-                      >
-                        <Languages className="h-4 w-4" />
-                        Linguistic Analysis
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link
-                        to="/research/cultural-studies"
-                        className="flex items-center gap-2 w-full"
-                      >
-                        <Book className="h-4 w-4" />
-                        Cultural Studies
-                      </Link>
-                    </DropdownMenuItem>
+                   
                   </DropdownMenuContent>
                 </DropdownMenu>
               </NavigationMenuItem>
