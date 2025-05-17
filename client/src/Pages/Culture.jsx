@@ -15,11 +15,10 @@ import {
   ThumbsDown,
   Search,
   Plus,
-  Badge,
   ChevronRight,
   Upload,
-  Map,
   User,
+  Loader2,
 } from "lucide-react";
 import {
   Card,
@@ -36,14 +35,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
 } from "@/components/ui/sheet";
-import {
-  createCultureByAdmin,
-  getCultures,
-  createCultureByUser,
-  uploadFile,
-} from "@/store/Culture";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -57,16 +49,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
+import { createCultureByUser, getCultures } from "@/store/Culture";
 
 const Culture = () => {
-  const [activeTab, setActiveTab] = useState("traditions");
-  const [uploadOpen, setUploadOpen] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [openSheet, setOpenSheet] = useState(false);
   const { isAuthenticated } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-  const { cultures, isLoading, error } = useSelector((state) => state.culture);
+  const { cultures, isLoading } = useSelector((state) => state.culture);
   const { user } = useSelector((state) => state.auth);
   const [isUploading, setIsUploading] = useState(false);
   const [file, setFile] = useState(null);
@@ -77,34 +71,50 @@ const Culture = () => {
     fileType: "",
     status: "pending",
     user,
+    fileUrl: "",
   });
 
   useEffect(() => {
     dispatch(getCultures());
   }, [dispatch]);
 
-  const filteredCultures = cultures?.filter(
-    (item) => item.status === "approved"
-  );
+  const categories = [
+    { id: "traditions", name: "Traditions & Customs" },
+    { id: "history", name: "History & Heritage" },
+    { id: "arts", name: "Arts & Crafts" },
+    { id: "music", name: "Music & Dance" },
+    { id: "social", name: "Social Customs" },
+    { id: "folklore", name: "Folklore" },
+  ];
+
+  const filteredCultures = cultures?.filter((item) => {
+    const statusMatch = item.status === "approved";
+    const categoryMatch =
+      activeTab === "all" || item.category.toLowerCase().includes(activeTab);
+    const searchMatch =
+      !searchQuery ||
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return statusMatch && categoryMatch && searchMatch;
+  });
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
+
+    // Validate file size (max 5MB)
+    if (selectedFile.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB");
+      return;
+    }
+
+    setFile(selectedFile);
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case "approved":
-        return <ThumbsUp className="h-4 w-4 text-green-500" />;
-      case "rejected":
-        return <ThumbsDown className="h-4 w-4 text-red-500" />;
-      default:
-        return <Clock className="h-4 w-4 text-amber-500" />;
-    }
   };
 
   const getFileTypeIcon = (fileType) => {
@@ -115,8 +125,6 @@ const Culture = () => {
         return <Video className="h-5 w-5 text-amber-600" />;
       case "audio":
         return <Music className="h-5 w-5 text-amber-600" />;
-      case "gallery":
-        return <FileImage className="h-5 w-5 text-amber-600" />;
       default:
         return <File className="h-5 w-5 text-amber-600" />;
     }
@@ -128,76 +136,80 @@ const Culture = () => {
     switch (culture.fileType) {
       case "image":
         return (
-          <div className="mt-3 rounded-md overflow-hidden">
-            <img
-              src={culture.fileUrl}
-              alt={culture.title}
-              className="w-full h-48 object-cover"
-            />
-          </div>
+          <img
+            src={culture.fileUrl}
+            alt={culture.title}
+            className="w-full h-48 object-cover rounded-md"
+          />
         );
       case "video":
         return (
-          <div className="mt-3 rounded-md overflow-hidden">
-            <video
-              controls
-              className="w-full h-48 object-cover"
-              src={culture.fileUrl}
-            />
-          </div>
+          <video
+            controls
+            className="w-full h-48 object-cover rounded-md"
+            src={culture.fileUrl}
+          />
         );
       case "audio":
         return (
-          <div className="mt-3">
-            <audio controls className="w-full">
-              <source src={culture.fileUrl} type="audio/mpeg" />
-              Your browser does not support the audio element.
-            </audio>
-          </div>
+          <audio controls className="w-full">
+            <source src={culture.fileUrl} type="audio/mpeg" />
+          </audio>
         );
       default:
         return (
-          <div className="mt-3">
-            <a
-              href={culture.fileUrl}
-              download
-              className="flex items-center text-amber-600 hover:text-amber-800"
-            >
-              <Download className="mr-2 h-4 w-4" />
-              Download File
-            </a>
-          </div>
+          <Button
+            variant="ghost"
+            onClick={() => window.open(culture.fileUrl, "_blank")}
+            className="text-amber-600 hover:text-amber-800"
+          >
+            <Download className="mr-2 h-4 w-4" />
+            View File
+          </Button>
         );
     }
   };
 
-  const categories = [
-    "Traditions & Customs",
-    "History & Heritage",
-    "Arts & Crafts",
-    "Music & Dance",
-    "Social Customs & Etiquette",
-    "Folklore & Oral Traditions",
-  ];
-
   useEffect(() => {
     if (file) {
       setIsUploading(true);
-      const data = new FormData();
-      data.append("file", file);
-      dispatch(uploadFile(data)).then((res) => {
-        if (res?.payload?.success) {
-          setFormData({ ...formData, fileUrl: res?.payload?.data.url });
-          setIsUploading(false);
-        }
-      });
+      const formData = new FormData();
+      formData.append("file", file);
+
+      dispatch(uploadFile(formData))
+        .then((res) => {
+          if (res?.payload?.success) {
+            setFormData((prev) => ({
+              ...prev,
+              fileUrl: res.payload.data.url,
+            }));
+            toast.success("File uploaded successfully");
+          } else {
+            toast.error("File upload failed");
+          }
+        })
+        .finally(() => setIsUploading(false));
     }
-  }, [file]);
+  }, [file, dispatch]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(createCultureByUser(formData)).then((res) => {
-      if (res?.payload?.success) {
+
+    // Validate form
+    if (
+      !formData.title ||
+      !formData.category ||
+      !formData.fileType ||
+      !formData.fileUrl
+    ) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+
+    try {
+      const result = await dispatch(createCultureByUser(formData));
+      if (result?.payload?.success) {
+        toast.success("Content submitted successfully!");
         setFormData({
           title: "",
           category: "",
@@ -205,45 +217,68 @@ const Culture = () => {
           fileType: "",
           status: "pending",
           user,
+          fileUrl: "",
         });
-        setOpenSheet(false);
         setFile(null);
+        setOpenSheet(false);
         dispatch(getCultures());
+      } else {
+        toast.error("Submission failed. Please try again.");
       }
-    });
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    }
+  };
+
+  const handleTabChange = (value) => {
+    setActiveTab(value);
+    setSearchQuery("");
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
-      {/* Main Content */}
+    <div className="min-h-screen">
       <div className="container py-12 px-4 sm:px-6 lg:px-8">
-        {/* Search and Upload */}
-        <div className="flex flex-col sm:flex-row justify-end items-end sm:items-center gap-4 mb-8">
-          <Sheet open={openSheet} onOpenChange={setOpenSheet}>
-            {isAuthenticated ? (
-              <SheetTrigger asChild>
-                <Button className="bg-amber-600 hover:bg-amber-700">
-                  <Upload className="h-4 w-4 mr-2" /> Share Your Content
-                </Button>
-              </SheetTrigger>
-            ) : (
-              <Button className="bg-amber-600 hover:bg-amber-700">
-                <Link to="/login" className="flex justify-center items-center">
-                  <Upload className="h-4 w-4 mr-2" /> Share Your Content
-                </Link>
-              </Button>
-            )}
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div className="relative w-full sm:w-96">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search cultural content..."
+              className="pl-9 pr-10 h-12 w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
 
-            <SheetContent side="right" className="w-full sm:w-[500px]">
-              <SheetHeader>
+          <Sheet open={openSheet} onOpenChange={setOpenSheet}>
+            <SheetTrigger asChild>
+              {isAuthenticated ? (
+                <Button className="bg-amber-600 hover:bg-amber-700">
+                  <Plus className="h-4 w-4 mr-2" /> Add Content
+                </Button>
+              ) : (
+                <Button asChild className="bg-amber-600 hover:bg-amber-700">
+                  <Link to="/login">
+                    <Plus className="h-4 w-4 mr-2" /> Add Content
+                  </Link>
+                </Button>
+              )}
+            </SheetTrigger>
+
+            <SheetContent
+              side="right"
+              className="w-full sm:w-[500px] overflow-y-auto  p-4"
+            >
+              <SheetHeader className="mb-6">
                 <SheetTitle className="text-amber-900">
-                  Add New Cultural Content
+                  Add Cultural Content
                 </SheetTitle>
               </SheetHeader>
-              <form onSubmit={handleSubmit} className="mt-6 space-y-4 p-4">
-                <div>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
                   <Label htmlFor="title" className="text-amber-800">
-                    Title
+                    Title *
                   </Label>
                   <Input
                     id="title"
@@ -251,13 +286,13 @@ const Culture = () => {
                     value={formData.title}
                     onChange={handleInputChange}
                     required
-                    className="mt-1"
+                    placeholder="Enter content title"
                   />
                 </div>
 
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="category" className="text-amber-800">
-                    Category
+                    Category *
                   </Label>
                   <Select
                     name="category"
@@ -267,36 +302,36 @@ const Culture = () => {
                     }
                     required
                   >
-                    <SelectTrigger className="mt-1">
+                    <SelectTrigger>
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                     <SelectContent>
                       {categories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
+                        <SelectItem key={category.id} value={category.name}>
+                          {category.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="description" className="text-amber-800">
                     Description
                   </Label>
-                  <Input
+                  <Textarea
                     id="description"
                     name="description"
                     value={formData.description}
                     onChange={handleInputChange}
-                    required
-                    className="mt-1"
+                    placeholder="Describe your content"
+                    rows={4}
                   />
                 </div>
 
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="fileType" className="text-amber-800">
-                    Media Type
+                    Media Type *
                   </Label>
                   <Select
                     name="fileType"
@@ -306,83 +341,93 @@ const Culture = () => {
                     }
                     required
                   >
-                    <SelectTrigger className="mt-1">
+                    <SelectTrigger>
                       <SelectValue placeholder="Select media type" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="image">Image</SelectItem>
                       <SelectItem value="video">Video</SelectItem>
                       <SelectItem value="audio">Audio</SelectItem>
-                      <SelectItem value="gallery">Image Gallery</SelectItem>
                       <SelectItem value="document">Document</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="file" className="text-amber-800">
-                    Media File
+                    Media File *
                   </Label>
-                  <div className="mt-1 flex items-center gap-2">
+                  <div className="flex items-center gap-4">
                     <Label
-                      htmlFor="file"
-                      className="cursor-pointer bg-amber-100 text-amber-800 px-4 py-2 rounded-md hover:bg-amber-200 transition-colors flex items-center"
+                      htmlFor="file-upload"
+                      className={`flex-1 cursor-pointer border-2 border-dashed rounded-lg p-4 text-center hover:bg-amber-50 transition-colors ${
+                        file ? "border-amber-300" : "border-gray-300"
+                      }`}
                     >
-                      <Upload className="mr-2 h-4 w-4" />
-                      {file ? file.name : "Choose file"}
+                      {file ? (
+                        <div className="space-y-2">
+                          <p className="font-medium text-amber-800 truncate">
+                            {file.name}
+                          </p>
+                          <p className="text-xs text-amber-600">
+                            {(file.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <Upload className="mx-auto h-8 w-8 text-amber-500" />
+                          <p className="text-sm text-amber-700">
+                            Click to upload or drag and drop
+                          </p>
+                          <p className="text-xs text-amber-500">
+                            Max file size: 5MB
+                          </p>
+                        </div>
+                      )}
                     </Label>
                     <Input
-                      id="file"
+                      id="file-upload"
                       type="file"
                       onChange={handleFileChange}
                       className="hidden"
+                      accept={
+                        formData.fileType === "image"
+                          ? "image/*"
+                          : formData.fileType === "video"
+                          ? "video/*"
+                          : formData.fileType === "audio"
+                          ? "audio/*"
+                          : "*"
+                      }
                       required
                     />
-                    {file && (
-                      <span className="text-sm text-amber-600 flex items-center">
-                        <Check className="h-4 w-4 mr-1" />
-                        Selected
-                      </span>
-                    )}
                   </div>
                   {isUploading && (
-                    <p className="text-xs text-amber-600 mt-1">
-                      Uploading file...
-                    </p>
+                    <div className="flex items-center gap-2 text-sm text-amber-600">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Uploading file...</span>
+                    </div>
+                  )}
+                  {formData.fileUrl && !isUploading && (
+                    <div className="flex items-center gap-2 text-sm text-green-600">
+                      <Check className="h-4 w-4" />
+                      <span>File uploaded successfully</span>
+                    </div>
                   )}
                 </div>
 
                 <Button
                   type="submit"
-                  className="w-full bg-amber-600 hover:bg-amber-700 mt-6"
-                  disabled={isLoading || isUploading}
+                  className="w-full bg-amber-600 hover:bg-amber-700"
+                  disabled={isUploading || isLoading}
                 >
-                  {isLoading || isUploading ? (
+                  {isUploading || isLoading ? (
                     <>
-                      <svg
-                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      Uploading...
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Submitting...
                     </>
                   ) : (
-                    "Upload Content"
+                    "Submit Content"
                   )}
                 </Button>
               </form>
@@ -390,106 +435,101 @@ const Culture = () => {
           </Sheet>
         </div>
 
-        {/* Content Grid */}
-        <div className="min-h-screen p-4 sm:p-6">
-          <div className="max-w-6xl mx-auto">
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                {error}
-              </div>
-            )}
+        {/* Main Content */}
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <TabsList className="grid w-full  grid-cols-2 sm:grid-cols-3 md:grid-cols-6 mb-8">
+            <TabsTrigger value="all">All</TabsTrigger>
+            {categories.map((category) => (
+              <TabsTrigger key={category.id} value={category.id}>
+                {category.name.split(" & ")[0]}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-            {isLoading && filteredCultures?.length === 0 ? (
-              <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500"></div>
-              </div>
-            ) : filteredCultures?.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-md p-8 text-center">
-                <p className="text-amber-700 text-lg">
-                  No cultural content uploaded yet. Click "Add Cultural Content"
-                  to get started.
-                </p>
-              </div>
-            ) : (
-              <Tabs defaultValue={categories[0]} className="w-full mb-8">
-                <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6 mb-6">
-                  {categories.map((category) => (
-                    <TabsTrigger key={category} value={category}>
-                      {category.split(" & ")[0]}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-
-                {categories.map((category) => (
-                  <TabsContent key={category} value={category}>
-                    <div className="grid pt-8 grid-cols-1 md:grid-cols-2 md:pt-4 lg:grid-cols-3 gap-6 lg:pt-4">
-                      {filteredCultures
-                        .filter((culture) => culture.category === category)
-                        .map((culture) => (
-                          <Card
-                            key={culture._id}
-                            className="hover:shadow-lg transition-shadow h-full flex flex-col"
-                          >
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                              <CardTitle className="text-lg font-bold text-amber-900">
-                                {culture.title}
-                              </CardTitle>
-                              <div className="flex items-center gap-2">
-                                {getFileTypeIcon(culture.fileType)}
-                                {getStatusIcon(culture.status)}
-                              </div>
-                            </CardHeader>
-                            <CardContent className="flex-grow">
-                              <p className="text-sm text-gray-600 mb-3">
-                                {culture.description}
-                              </p>
-
-                              {renderMediaContent(culture)}
-
-                              {/* Contributor Information */}
-                              <div className="mt-3 flex items-center gap-2 text-sm text-amber-600">
-                                <User className="h-4 w-4" />
-                                <span>
-                                  {culture.user?.name ||
-                                    "Anonymous Contributor"}
-                                </span>
-                              </div>
-
-                              <div className="mt-4 flex items-center justify-between">
-                                <Badge
-                                  variant="outline"
-                                  className="text-amber-600"
-                                >
-                                  {culture.fileType}
-                                </Badge>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                    </div>
-                  </TabsContent>
-                ))}
-              </Tabs>
-            )}
-          </div>
-        </div>
-
-        {/* User Contributions Section */}
-        <div className="mt-12">
-          {/* Horizontal scrolling container */}
-          <div className="mt-12">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-amber-900">
-                Community Contributors
-              </h2>
-              <Button variant="ghost" className="text-amber-600">
-                View All <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="h-8 w-8 text-amber-600 animate-spin" />
             </div>
+          ) : (
+            <div className="mt-15">
+              {filteredCultures?.length === 0 ? (
+                <div className="text-center  bg-amber-50 rounded-lg">
+                  <File className="h-12 w-12 text-amber-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-amber-800">
+                    No content found
+                  </h3>
+                  <p className="mt-2 text-sm text-amber-600">
+                    {searchQuery
+                      ? "No results match your search"
+                      : activeTab === "all"
+                      ? "No cultural content available yet"
+                      : `No ${
+                          categories.find((c) => c.id === activeTab)?.name ||
+                          activeTab
+                        } content found`}
+                  </p>
+                  {isAuthenticated && (
+                    <Button
+                      onClick={() => setOpenSheet(true)}
+                      className="mt-4 bg-amber-600 hover:bg-amber-700"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Content
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredCultures.map((culture) => (
+                    <Card
+                      key={culture._id}
+                      className="hover:shadow-md transition-shadow"
+                    >
+                      <CardHeader>
+                        <div className="flex justify-between items-start gap-2">
+                          <CardTitle className="text-amber-900">
+                            {culture.title}
+                          </CardTitle>
+                          <Badge variant="outline" className="text-amber-600">
+                            {culture.category.split(" & ")[0]}
+                          </Badge>
+                        </div>
+                        <CardDescription className="text-amber-800 line-clamp-2">
+                          {culture.description}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>{renderMediaContent(culture)}</CardContent>
+                      <CardFooter className="flex justify-between items-center">
+                        <div className="flex items-center text-sm text-amber-600">
+                          {getFileTypeIcon(culture.fileType)}
+                          <span className="ml-2 capitalize">
+                            {culture.fileType}
+                          </span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          className="text-amber-600 hover:text-amber-800"
+                          onClick={() => window.open(culture.fileUrl, "_blank")}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          View
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </Tabs>
 
-            {/* Auto-scrolling carousel container */}
+        {/* Contributors Section */}
+        {filteredCultures?.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold text-amber-900 mb-6">
+              Top Contributors
+            </h2>
             <div className="relative overflow-hidden">
-              {/* Moving cards */}
               <div className="animate-marquee whitespace-nowrap">
                 {[...filteredCultures, ...filteredCultures].map(
                   (culture, index) => (
@@ -505,8 +545,8 @@ const Culture = () => {
                           <p className="font-medium text-amber-900 truncate">
                             {culture.user?.name || "Anonymous"}
                           </p>
-                          <p className="text-xs text-amber-600 capitalize">
-                            {culture.category.split(" & ")[0].toLowerCase()}
+                          <p className="text-xs text-amber-600">
+                            {culture.contributions || 1} contribution(s)
                           </p>
                         </div>
                       </div>
@@ -516,7 +556,7 @@ const Culture = () => {
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

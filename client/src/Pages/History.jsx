@@ -95,6 +95,32 @@ const History = () => {
   const [filePreview, setFilePreview] = useState(null);
   const dispatch = useDispatch();
 
+  // Game functions
+  const checkMatch = (engId, twiId) => {
+    const pairs = {
+      "eng-0": "twi-2", // Hello - Agoo
+      "eng-1": "twi-3", // Thank you - Medaase
+      "eng-2": "twi-1", // Good morning - Maakye
+      "eng-3": "twi-4", // Family - Abusua
+      "eng-4": "twi-0", // Food - Aduane
+    };
+    return pairs[engId] === twiId;
+  };
+
+  const checkCompletion = () => {
+    const visibleElements = document.querySelectorAll(
+      '[id^="eng-"], [id^="twi-"]'
+    );
+    const visibleCount = Array.from(visibleElements).filter(
+      (el) => el.style.visibility !== "hidden"
+    ).length;
+
+    if (visibleCount === 0) {
+      document.getElementById("game-feedback").textContent =
+        "Yɛyɛɛ! (Well done!)";
+    }
+  };
+
   useEffect(() => {
     dispatch(getHistoryEntries());
   }, [dispatch]);
@@ -551,14 +577,14 @@ const History = () => {
           </div>
         )}
 
-        {/* Discussion Forum Preview */}
+        {/* Akan Language Game */}
         <div className="mt-12">
           <h2 className="text-2xl font-bold text-amber-900 mb-6">
-            Research Discussions
+            Akan Language Match
           </h2>
-          <Card>
+          <Card className="bg-amber-50 border-amber-200">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-amber-800">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -571,52 +597,102 @@ const History = () => {
                   strokeLinejoin="round"
                   className="h-5 w-5 text-amber-600"
                 >
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  <path d="m4.9 4.9 14.2 14.2"></path>
                 </svg>
-                Join the Historical Research Forum
+                Match the Words
               </CardTitle>
-              <CardDescription>
-                Connect with other researchers and discuss historical findings
+              <CardDescription className="text-amber-700">
+                Connect Twi words to their English meanings
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {[
-                  {
-                    title: "Interpretation of 18th Century Migration Records",
-                    author: "Dr. Kwame Asante",
-                    date: "2 days ago",
-                    replies: 5,
-                  },
-                  {
-                    title:
-                      "Seeking primary sources on Ashanti-British relations",
-                    author: "Sarah Mensah",
-                    date: "1 week ago",
-                    replies: 3,
-                  },
-                ].map((thread, index) => (
-                  <div
-                    key={index}
-                    className="border-b pb-4 last:border-b-0 last:pb-0"
-                  >
-                    <h3 className="font-medium hover:text-amber-600 cursor-pointer">
-                      {thread.title}
-                    </h3>
-                    <div className="flex justify-between text-sm text-muted-foreground mt-1">
-                      <span>
-                        By {thread.author} • {thread.date}
-                      </span>
-                      <span>{thread.replies} replies</span>
-                    </div>
-                  </div>
-                ))}
+              <div className="grid grid-cols-2 gap-4 min-h-[200px]">
+                {/* English Words Column */}
+                <div className="space-y-2">
+                  <h3 className="font-medium text-amber-900 mb-2">English</h3>
+                  {["Hello", "Thank you", "Good morning", "Family", "Food"].map(
+                    (word, index) => (
+                      <div
+                        key={`eng-${index}`}
+                        id={`eng-${index}`}
+                        className="p-3 bg-white rounded border border-amber-200 cursor-move text-center"
+                        draggable="true"
+                        onDragStart={(e) =>
+                          e.dataTransfer.setData("text/plain", `eng-${index}`)
+                        }
+                      >
+                        {word}
+                      </div>
+                    )
+                  )}
+                </div>
+
+                {/* Twi Words Column */}
+                <div className="space-y-2">
+                  <h3 className="font-medium text-amber-900 mb-2">Twi</h3>
+                  {["Aduane", "Maakye", "Agoo", "Medaase", "Abusua"].map(
+                    (word, index) => (
+                      <div
+                        key={`twi-${index}`}
+                        id={`twi-${index}`}
+                        className="p-3 bg-white rounded border border-amber-200 text-center"
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          const draggedId =
+                            e.dataTransfer.getData("text/plain");
+                          const draggedElement =
+                            document.getElementById(draggedId);
+                          if (draggedElement) {
+                            const isCorrect = checkMatch(
+                              draggedId,
+                              `twi-${index}`
+                            );
+                            e.currentTarget.style.backgroundColor = isCorrect
+                              ? "#d97706"
+                              : "#fca5a5";
+                            if (isCorrect) {
+                              setTimeout(() => {
+                                draggedElement.style.visibility = "hidden";
+                                e.currentTarget.style.visibility = "hidden";
+                                checkCompletion();
+                              }, 500);
+                            }
+                          }
+                        }}
+                        onDragOver={(e) => e.preventDefault()}
+                      >
+                        {word}
+                      </div>
+                    )
+                  )}
+                </div>
               </div>
             </CardContent>
-            <CardFooter>
-              <Button variant="outline" className="w-full">
-                View All Discussions
+            <CardFooter className="flex-col items-center space-y-3">
+              <div
+                id="game-feedback"
+                className="text-amber-700 font-medium"
+              ></div>
+              <Button
+                variant="outline"
+                className="border-amber-300 text-amber-700"
+                onClick={() => {
+                  const elements = document.querySelectorAll(
+                    '[id^="eng-"], [id^="twi-"]'
+                  );
+                  elements.forEach((el) => {
+                    el.style.visibility = "visible";
+                    el.style.backgroundColor = "white";
+                  });
+                  document.getElementById("game-feedback").textContent = "";
+                }}
+              >
+                Reset Game
               </Button>
+              <div className="text-xs text-amber-600">
+                <p>Drag English words to match with Twi words</p>
+              </div>
             </CardFooter>
           </Card>
         </div>
@@ -626,3 +702,6 @@ const History = () => {
 };
 
 export default History;
+
+/*
+ */

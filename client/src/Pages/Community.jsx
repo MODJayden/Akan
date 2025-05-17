@@ -128,8 +128,7 @@ const Community = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
-      {/* Hero Section */}
+    <div className="min-h-screen ">
 
       {/* Main Content */}
       <div className="container py-12 px-4 sm:px-6 lg:px-8">
@@ -156,34 +155,7 @@ const Community = () => {
                 </Button>
               </div>
 
-              {showFilters && (
-                <Card className="p-4 mb-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Content Type
-                      </label>
-                      <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                        <option value="">All Types</option>
-                        <option value="discussion">Discussions</option>
-                        <option value="event">Events</option>
-                        <option value="question">Questions</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Topic
-                      </label>
-                      <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                        <option value="">All Topics</option>
-                        <option value="language">Language Learning</option>
-                        <option value="culture">Cultural Practices</option>
-                        <option value="history">History</option>
-                      </select>
-                    </div>
-                  </div>
-                </Card>
-              )}
+              
             </div>
 
             {/* Community Tabs */}
