@@ -9,7 +9,10 @@ import alphabetReducer from "./Alphabet";
 import phraseReducer from "./Phrases"; 
 import cultureReducer from "./Culture"; 
 import dictionaryReducer from "./Dictionary";
-import historyReducer from "./History"; 
+import historyReducer from "./History";
+import commentReducer from "./commentSlice";
+import discussionReducer from "./discussionSlice";
+import eventReducer from "./Event"; // ADDED
 
 const store = configureStore({
   reducer: {
@@ -22,8 +25,11 @@ const store = configureStore({
     alphabet: alphabetReducer,
     phrase: phraseReducer,
     culture: cultureReducer,
-    dictionary: dictionaryReducer, 
-    history: historyReducer, 
+    dictionary: dictionaryReducer,
+    history: historyReducer,
+    comments: commentReducer,
+    discussions: discussionReducer,
+    event: eventReducer, // ADDED
   },
 });
 

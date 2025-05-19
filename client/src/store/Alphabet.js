@@ -10,7 +10,7 @@ export const createAlphabet = createAsyncThunk(
         `${import.meta.env.VITE_API_URL}/api/alphabet/alphabet`,
         form
       );
-      return res?.data;
+      return res?.data ?? null;
     } catch (error) {
       return "Alphabet creation failed: " + error.message;
     }
@@ -25,7 +25,7 @@ export const getAlphabets = createAsyncThunk(
       const res = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/alphabet/alphabet`
       );
-      return res?.data;
+      return res?.data ?? null;
     } catch (error) {
       return thunkAPI.rejectWithValue(
         "Failed to fetch alphabets: " + error.message
@@ -42,7 +42,7 @@ export const uploadAudio = createAsyncThunk(
         `${import.meta.env.VITE_API_URL}/api/cloudinary/upload`,
         data
       );
-      return res?.data;
+      return res?.data ?? null;
     } catch (error) {
       return "Audio upload failed: " + error.message;
     }
@@ -88,7 +88,7 @@ const alphabetSlice = createSlice({
       .addCase(createAlphabet.fulfilled, (state, action) => {
         state.isLoading = false;
         // The controller returns { message: "...", data: newAlphabet }
-        state.alphabets.push(action.payload.data || action.payload);
+        state.alphabets.push(action.payload.data ?? action.payload);
       })
       .addCase(createAlphabet.rejected, (state, action) => {
         state.isLoading = false;
@@ -102,7 +102,7 @@ const alphabetSlice = createSlice({
       .addCase(getAlphabets.fulfilled, (state, action) => {
         state.isLoading = false;
         // The controller returns { message: "...", data: alphabets }
-        state.alphabets = action.payload.data || action.payload;
+        state.alphabets = action.payload.data ?? action.payload;
       })
       .addCase(getAlphabets.rejected, (state, action) => {
         state.isLoading = false;

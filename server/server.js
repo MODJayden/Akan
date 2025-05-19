@@ -15,6 +15,9 @@ const phrasesRouter = require("./Router/Phrases");
 const cultureRouter = require("./Router/culture"); // Added culture
 const dictionaryRouter = require("./Router/Dictionary");
 const historyRouter = require("./Router/History");
+const commentRouter = require("./Router/comment");
+const discussionRouter = require("./Router/discussion");
+const eventRouter = require("./Router/event"); // ADDED
 const path = require("path");
 
 connectDB();
@@ -54,6 +57,9 @@ app.use("/api/phrases", phrasesRouter);
 app.use("/api/culture", cultureRouter);
 app.use("/api/dictionary", dictionaryRouter);
 app.use("/api/history", historyRouter);
+app.use("/api/comments", commentRouter);
+app.use("/api/discussions", discussionRouter);
+app.use("/api/events", eventRouter); // ADDED
 
 if (process.env.NODE_ENV === "production") {
   // Serve static files from the React app

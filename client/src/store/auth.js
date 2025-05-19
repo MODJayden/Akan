@@ -5,9 +5,12 @@ export const checkAuthStatus = createAsyncThunk(
   "auth/checkStatus",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/auth/login/success`, {
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/auth/login/success`,
+        {
+          withCredentials: true,
+        }
+      );
       return response?.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -24,7 +27,6 @@ export const loginWithGoogle = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message);
       console.log(error);
-      
     }
   }
 );
@@ -105,4 +107,3 @@ const authSlice = createSlice({
 });
 
 export default authSlice.reducer;
-
