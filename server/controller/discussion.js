@@ -37,13 +37,20 @@ const getAllDiscussions = async (req, res) => {
   try {
     const discussions = await Community.find()
       .populate("author")
+      .populate({
+        path: "comments",
+        populate: {
+          path: "author",
+          model: "User", // Make sure this matches your User model name
+        },
+      })
       .sort({ createdAt: -1 });
+
     res.status(200).json({
       message: "Discussions retrieved successfully",
       data: discussions,
       success: true,
     });
-    
   } catch (error) {
     res.status(500).json({
       message: "Error retrieving discussions",

@@ -1,4 +1,5 @@
 const Comment = require("../Model/comment");
+const Discussion = require("../Model/community");
 
 // Create a new comment
 const createComment = async (req, res) => {
@@ -10,15 +11,29 @@ const createComment = async (req, res) => {
         message: "Missing required fields: content and user are required.",
       });
     }
+    const discussion = await Discussion.findById(discussionId);
 
-    const newComment = await Comment.create({
+    if (!discussion) {
+      return res
+        .status(404)
+        .json({ message: "Discussion not found", success: false });
+    }
+    const comment = await Comment.create({
       content,
       author,
       discussionId,
     });
+
+    const commentId = comment._id.toString();
+    const commentedDiscussion = await Discussion.findByIdAndUpdate(
+      discussionId,
+      { $push: { comments: commentId } },
+      { new: true, runValidators: true }
+    );
+
     res.status(201).json({
       message: "Comment created successfully",
-      data: newComment,
+      data: commentedDiscussion,
       success: true,
     });
   } catch (error) {
@@ -32,7 +47,7 @@ const createComment = async (req, res) => {
 const getAllComments = async (req, res) => {
   try {
     const comments = await Comment.find()
-      .populate("user")
+      .populate("author")
       .sort({ createdAt: -1 });
     res.status(200).json({
       message: "Comments retrieved successfully",

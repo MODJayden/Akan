@@ -21,10 +21,7 @@ const eventSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  attendees: {
-    type: Number,
-    required: true,
-  },
+
   tags: {
     type: [String],
     required: true,

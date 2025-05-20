@@ -9,7 +9,7 @@ export const createComment = createAsyncThunk(
   async (commentData, thunkAPI) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/create`, commentData);
-      return response.data.data;
+      return response?.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Error creating comment: " + error.message
@@ -24,7 +24,7 @@ export const fetchComments = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/getAll`);
-      return response.data.data;
+      return response?.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Error fetching comments: " + error.message

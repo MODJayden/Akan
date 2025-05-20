@@ -334,18 +334,11 @@ const Navbar = () => {
                         Profile
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        to="/settings"
-                        className="flex items-center gap-2 w-full"
-                      >
-                        <Settings className="h-4 w-4" />
-                        Settings
-                      </Link>
-                    </DropdownMenuItem>
+                     
                     <DropdownMenuSeparator />
                     <Button
                       onClick={handleLogout}
+                      variant={"outline"}
                       className="w-full bg-white text-red-600 focus:text-red-600"
                     >
                       <DropdownMenuItem className="text-red-600 w-full ">

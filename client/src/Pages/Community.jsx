@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   MessageSquare,
-  Calendar,
+  Calendar as CalendarIcon,
   User,
   Share2,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   Plus,
   Bookmark,
   Heart,
@@ -17,6 +18,10 @@ import {
   Twitter,
   Instagram,
   Youtube,
+  Clock,
+  MapPin,
+  MoveLeft,
+  MoveRight,
 } from "lucide-react";
 import {
   Card,
@@ -54,6 +59,27 @@ import { createEvent, getEvents } from "@/store/Event";
 import { formatDistanceToNow } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
+
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
+const getFirstDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
 
 const Community = () => {
   const [activeTab, setActiveTab] = useState("discussions");
@@ -77,6 +103,8 @@ const Community = () => {
   });
   const [newComment, setNewComment] = useState({});
   const [selectedDiscussion, setSelectedDiscussion] = useState(null);
+  const [openDiscussionSheet, setOpenDiscussionSheet] = useState(false);
+  const [openEventSheet, setOpenEventSheet] = useState(false);
 
   const { discussions, isLoading: discussionsLoading } = useSelector(
     (state) => state.discussions
@@ -89,20 +117,152 @@ const Community = () => {
   );
   const dispatch = useDispatch();
 
+  // Calendar state
+  const currentDate = new Date();
+  const [currentMonth, setCurrentMonth] = useState(currentDate.getMonth());
+  const [currentYear, setCurrentYear] = useState(currentDate.getFullYear());
+  const [selectedDate, setSelectedDate] = useState(
+    currentDate.toISOString().split("T")[0]
+  );
+  const calendarRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+
   useEffect(() => {
-    dispatch(fetchComments());
     dispatch(fetchDiscussions());
     dispatch(getEvents());
   }, [dispatch]);
 
+  // Calendar navigation
+  const prevMonth = () => {
+    setCurrentMonth((prev) => (prev === 0 ? 11 : prev - 1));
+    if (currentMonth === 0) setCurrentYear((prev) => prev - 1);
+  };
+
+  const nextMonth = () => {
+    setCurrentMonth((prev) => (prev === 11 ? 0 : prev + 1));
+    if (currentMonth === 11) setCurrentYear((prev) => prev + 1);
+  };
+
+  const goToToday = () => {
+    setCurrentMonth(currentDate.getMonth());
+    setCurrentYear(currentDate.getFullYear());
+    setSelectedDate(currentDate.toISOString().split("T")[0]);
+  };
+
+  // Swipe/drag handlers
+  const handleTouchStart = (e) => {
+    setIsDragging(true);
+    setStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDragging) return;
+    const diff = e.touches[0].clientX - startX;
+    if (Math.abs(diff) > 50) {
+      setIsDragging(false);
+      diff > 0 ? prevMonth() : nextMonth();
+    }
+  };
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setStartX(e.clientX);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    const diff = e.clientX - startX;
+    if (Math.abs(diff) > 50) {
+      setIsDragging(false);
+      diff > 0 ? prevMonth() : nextMonth();
+    }
+  };
+
+  const endDrag = () => setIsDragging(false);
+
+  // Calendar rendering
+  const renderCalendar = () => {
+    const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+    const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth);
+    const days = [];
+
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < firstDayOfMonth; i++) {
+      days.push(
+        <div
+          key={`empty-${i}`}
+          className="h-24 p-1 border border-amber-100"
+        ></div>
+      );
+    }
+
+    // Add cells for each day of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(
+        2,
+        "0"
+      )}-${String(day).padStart(2, "0")}`;
+      const dayEvents = events?.filter(
+        (event) =>
+          event.date === dateStr ||
+          (event.endDate && dateStr >= event.date && dateStr <= event.endDate)
+      );
+
+      days.push(
+        <div
+          key={day}
+          onClick={() => setSelectedDate(dateStr)}
+          className={`h-24 p-1 border border-amber-100 overflow-y-auto cursor-pointer transition-colors ${
+            dateStr === selectedDate ? "bg-amber-100" : "hover:bg-amber-50"
+          } ${
+            dateStr === currentDate.toISOString().split("T")[0]
+              ? "border-amber-500 border-2"
+              : ""
+          }`}
+        >
+          <div className="font-medium text-right mb-1 text-amber-900">
+            {day}
+          </div>
+          {dayEvents?.slice(0, 2).map((event) => (
+            <div
+              key={event._id}
+              className="text-xs p-1 mb-1 rounded truncate bg-amber-200 text-amber-800"
+            >
+              {event.title}
+            </div>
+          ))}
+          {dayEvents?.length > 2 && (
+            <div className="text-xs text-amber-600">
+              +{dayEvents.length - 2} more
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return days;
+  };
+
+  // Get events for selected date
+  const selectedDateEvents = events?.filter(
+    (event) =>
+      selectedDate >= event.date &&
+      (event.endDate
+        ? selectedDate <= event.endDate
+        : selectedDate === event.date)
+  );
+
+  // Discussion functions
   const handleCreateDiscussion = (data) => {
     dispatch(createDiscussion(data)).then((res) => {
       if (res?.payload?.success) {
         setNewDiscussion({ title: "", content: "", tags: [] });
         dispatch(fetchDiscussions());
+        setOpenDiscussionSheet(false);
         toast.success("Discussion created successfully");
       } else {
-        toast.error("Discussion creation failed: " );
+        toast.error("Discussion creation failed");
       }
     });
   };
@@ -114,16 +274,22 @@ const Community = () => {
         organizer: user.name,
         attendees: 0,
       })
-    ).then(() => {
-      setNewEvent({
-        title: "",
-        date: "",
-        time: "",
-        location: "",
-        description: "",
-        tags: [],
-      });
-      dispatch(getEvents());
+    ).then((res) => {
+      if (res?.payload?.success) {
+        setNewEvent({
+          title: "",
+          date: "",
+          time: "",
+          location: "",
+          description: "",
+          tags: [],
+        });
+        dispatch(getEvents());
+        setOpenEventSheet(false);
+        toast.success("Event created successfully");
+      } else {
+        toast.error("Event creation failed");
+      }
     });
   };
 
@@ -134,16 +300,16 @@ const Community = () => {
         discussionId,
         author: user._id,
       })
-    ).then(() => {
-      setNewComment((prev) => ({ ...prev, [discussionId]: "" }));
-      dispatch(fetchComments());
-      dispatch(fetchDiscussions());
+    ).then((res) => {
+      if (res?.payload?.success) {
+        setNewComment((prev) => ({ ...prev, [discussionId]: "" }));
+        dispatch(fetchComments());
+        toast.success("Comment created successfully");
+        dispatch(fetchDiscussions());
+      } else {
+        toast.error("Comment creation failed");
+      }
     });
-  };
-
-  const handleLikeDiscussion = (discussionId) => {
-    // Implement like functionality
-    console.log("Liked discussion:", discussionId);
   };
 
   const availableTags = [
@@ -155,14 +321,8 @@ const Community = () => {
     "traditions",
   ];
 
-  const filteredDiscussions =
-    Array.isArray(discussions) &&
-    discussions?.filter((discussion) =>
-      discussion?.title?.toLowerCase()?.includes(searchQuery.toLowerCase())
-    );
-
-  const filteredEvents = events?.filter((event) =>
-    event.title.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredDiscussions = discussions?.filter((discussion) =>
+    discussion?.title?.toLowerCase()?.includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -213,14 +373,17 @@ const Community = () => {
                   value="events"
                   className="data-[state=active]:bg-amber-500 data-[state=active]:text-white"
                 >
-                  <Calendar className="h-4 w-4 mr-2" /> Events
+                  <CalendarIcon className="h-4 w-4 mr-2" /> Events
                 </TabsTrigger>
               </TabsList>
 
               {/* Discussions Tab */}
               <TabsContent value="discussions" className="p-4 space-y-6">
                 {/* New Post Button */}
-                <Sheet>
+                <Sheet
+                  open={openDiscussionSheet}
+                  onOpenChange={setOpenDiscussionSheet}
+                >
                   <SheetTrigger asChild>
                     <Button className="w-full bg-amber-600 hover:bg-amber-700 shadow-md">
                       <Plus className="h-4 w-4 mr-2" /> Start New Discussion
@@ -332,7 +495,9 @@ const Community = () => {
                         <SheetFooter>
                           <Button
                             className="w-full bg-amber-600 hover:bg-amber-700"
-                            onClick={() => handleCreateDiscussion(newDiscussion)}
+                            onClick={() =>
+                              handleCreateDiscussion(newDiscussion)
+                            }
                           >
                             Post Discussion
                           </Button>
@@ -393,7 +558,7 @@ const Community = () => {
                                 alt={discussion?.author?.name}
                               />
                               <AvatarFallback>
-                                {discussion?.author?.name?.charAt(0)}  
+                                {discussion?.author?.name?.charAt(0)}
                               </AvatarFallback>
                             </Avatar>
                             <div className="text-sm text-amber-800">
@@ -411,7 +576,9 @@ const Community = () => {
                           </div>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-amber-900">{discussion?.content}</p>
+                          <p className="text-amber-900">
+                            {discussion?.content}
+                          </p>
                           {discussion.tags.length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-3">
                               {discussion?.tags?.map((tag) => (
@@ -428,17 +595,6 @@ const Community = () => {
                         </CardContent>
                         <CardFooter className="flex justify-between border-t border-amber-100 pt-3">
                           <div className="flex items-center gap-4">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-amber-600"
-                              onClick={() =>
-                                handleLikeDiscussion(discussion._id)
-                              }
-                            >
-                              <Heart className="h-4 w-4 mr-2" />
-                              {discussion.likes.length}
-                            </Button>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -461,35 +617,35 @@ const Community = () => {
                         {selectedDiscussion === discussion._id && (
                           <div className="border-t border-amber-100 p-4 space-y-4">
                             <div className="space-y-4">
-                              {discussion.comments.map((comment) => (
-                                <div key={comment._id} className="flex gap-3">
+                              {discussion?.comments?.map((comment) => (
+                                <div key={comment?._id} className="flex gap-3">
                                   <Avatar className="h-8 w-8">
                                     <AvatarImage
-                                      src={comment.author.avatar}
-                                      alt={comment.author.name}
+                                      src={comment?.author?.avatar}
+                                      alt={comment?.author?.name}
                                     />
                                     <AvatarFallback>
-                                      {comment.author.name.charAt(0)}
+                                      {comment?.author?.name?.charAt(0)}
                                     </AvatarFallback>
                                   </Avatar>
                                   <div className="flex-1">
                                     <div className="bg-amber-50 rounded-lg p-3">
                                       <div className="flex items-center gap-2 text-sm">
                                         <span className="font-medium text-amber-900">
-                                          {comment.author.name}
+                                          {comment?.author?.name}
                                         </span>
                                         <span className="text-amber-600">
                                           •
                                         </span>
                                         <span className="text-amber-700">
                                           {formatDistanceToNow(
-                                            new Date(comment.createdAt),
+                                            new Date(comment?.createdAt),
                                             { addSuffix: true }
                                           )}
                                         </span>
                                       </div>
                                       <p className="mt-1 text-amber-900">
-                                        {comment.content}
+                                        {comment?.content}
                                       </p>
                                     </div>
                                   </div>
@@ -546,9 +702,14 @@ const Community = () => {
                 {/* Events Calendar */}
                 <Card className="border-amber-100">
                   <CardHeader>
-                    <CardTitle className="flex items-center justify-between text-amber-900">
-                      <span>Upcoming Events</span>
-                      <Sheet>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-amber-900">
+                        Upcoming Events
+                      </CardTitle>
+                      <Sheet
+                        open={openEventSheet}
+                        onOpenChange={setOpenEventSheet}
+                      >
                         <SheetTrigger asChild>
                           <Button
                             variant="outline"
@@ -721,149 +882,219 @@ const Community = () => {
                           </ScrollArea>
                         </SheetContent>
                       </Sheet>
-                    </CardTitle>
+                    </div>
+                    <div className="flex items-center justify-center gap-4 mt-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-amber-600 hover:bg-amber-100"
+                        onClick={prevMonth}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <h3 className="font-medium text-amber-900 min-w-[120px] text-center">
+                        {months[currentMonth]} {currentYear}
+                      </h3>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-amber-600 hover:bg-amber-100"
+                        onClick={nextMonth}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="border rounded-lg overflow-hidden border-amber-200">
+                    <div
+                      ref={calendarRef}
+                      className="border rounded-lg overflow-hidden border-amber-200 select-none"
+                      onTouchStart={handleTouchStart}
+                      onTouchMove={handleTouchMove}
+                      onTouchEnd={endDrag}
+                      onMouseDown={handleMouseDown}
+                      onMouseMove={handleMouseMove}
+                      onMouseUp={endDrag}
+                      onMouseLeave={endDrag}
+                    >
+                      {/* Day headers */}
                       <div className="grid grid-cols-7 bg-amber-100 text-amber-900 font-medium text-sm">
-                        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
-                          (day) => (
-                            <div
-                              key={day}
-                              className="p-2 text-center border-r border-amber-200 last:border-r-0"
-                            >
-                              {day}
-                            </div>
-                          )
-                        )}
-                      </div>
-                      <div className="grid grid-cols-7">
-                        {Array.from({ length: 35 }).map((_, index) => (
+                        {daysOfWeek.map((day) => (
                           <div
-                            key={index}
-                            className={`h-16 border border-amber-100 p-1 ${
-                              index === 18 ? "bg-amber-50" : "bg-white"
-                            }`}
+                            key={day}
+                            className="p-2 text-center border-r border-amber-200 last:border-r-0"
                           >
-                            {index < 31 && (
-                              <div className="text-right text-sm text-amber-800">
-                                {index + 1}
-                                {index === 18 && (
-                                  <div className="text-xs text-left mt-1 text-amber-800 truncate">
-                                    Twi Workshop
-                                  </div>
-                                )}
-                              </div>
-                            )}
+                            {day}
                           </div>
                         ))}
                       </div>
+
+                      {/* Calendar grid */}
+                      <div className="grid grid-cols-7 gap-0">
+                        {renderCalendar()}
+                      </div>
+                    </div>
+
+                    {/* Visual swipe hint */}
+                    <div className="flex justify-center items-center mt-2 gap-2 text-amber-600">
+                      <MoveLeft className="h-4 w-4" />
+                      <span className="text-xs">
+                        Swipe or click-and-drag to navigate
+                      </span>
+                      <MoveRight className="h-4 w-4" />
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Events List */}
-                {eventsLoading ? (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
-                  </div>
-                ) : filteredEvents.length === 0 ? (
-                  <Card className="text-center py-8">
-                    <CardDescription>
-                      No upcoming events. Add a new one!
-                    </CardDescription>
-                  </Card>
-                ) : (
-                  <div className="space-y-4">
-                    {filteredEvents.map((event) => (
-                      <Card
-                        key={event._id}
-                        className="hover:shadow-md transition-shadow border-amber-100"
-                      >
-                        <CardHeader className="pb-3">
+                {/* Selected Date Events */}
+                <div className="bg-amber-50 rounded-lg p-6">
+                  <h3 className="text-xl font-semibold mb-4">
+                    {selectedDate === currentDate.toISOString().split("T")[0]
+                      ? "Today's Events"
+                      : `Events on ${new Date(selectedDate).toLocaleDateString(
+                          "en-US",
+                          {
+                            weekday: "long",
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          }
+                        )}`}
+                  </h3>
+
+                  {selectedDateEvents?.length > 0 ? (
+                    <div className="space-y-4">
+                      {selectedDateEvents.map((event) => (
+                        <div
+                          key={event._id}
+                          className="bg-white p-4 rounded-lg shadow-sm"
+                        >
                           <div className="flex justify-between items-start">
+                            <div>
+                              <h4 className="font-bold text-lg">
+                                {event.title}
+                              </h4>
+                              <div className="flex items-center text-amber-700 mt-1">
+                                <Clock className="h-4 w-4 mr-1" />
+                                <span className="text-sm">{event.time}</span>
+                              </div>
+                              <div className="flex items-center text-amber-700">
+                                <MapPin className="h-4 w-4 mr-1" />
+                                <span className="text-sm">
+                                  {event.location}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="px-2 py-1 rounded text-xs font-medium bg-amber-100 text-amber-800">
+                              {event.category || "Event"}
+                            </div>
+                          </div>
+                          {event.description && (
+                            <p className="mt-2 text-amber-900">
+                              {event.description}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-amber-600">
+                      No events scheduled for this day
+                    </p>
+                  )}
+                </div>
+
+                {/* All Events List */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold text-amber-900">
+                    All Events in {months[currentMonth]} {currentYear}
+                  </h3>
+                  {eventsLoading ? (
+                    <div className="flex justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+                    </div>
+                  ) : events?.filter((event) => {
+                      const eventDate = new Date(event.date);
+                      return (
+                        eventDate.getMonth() === currentMonth &&
+                        eventDate.getFullYear() === currentYear
+                      );
+                    }).length === 0 ? (
+                    <Card className="text-center py-8">
+                      <CardDescription>
+                        No events found for this month
+                      </CardDescription>
+                    </Card>
+                  ) : (
+                    events
+                      ?.filter((event) => {
+                        const eventDate = new Date(event.date);
+                        return (
+                          eventDate.getMonth() === currentMonth &&
+                          eventDate.getFullYear() === currentYear
+                        );
+                      })
+                      .sort((a, b) => new Date(a.date) - new Date(b.date))
+                      .map((event) => (
+                        <Card key={event._id} className="border-amber-100">
+                          <CardHeader>
                             <CardTitle className="text-lg text-amber-900">
                               {event.title}
                             </CardTitle>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-amber-600"
-                                >
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent>
-                                <DropdownMenuItem>Bookmark</DropdownMenuItem>
-                                <DropdownMenuItem>Share</DropdownMenuItem>
-                                {user._id === event.organizer && (
-                                  <DropdownMenuItem className="text-red-600">
-                                    Delete
-                                  </DropdownMenuItem>
+                            <div className="flex items-center gap-2 text-sm text-amber-700">
+                              <CalendarIcon className="h-4 w-4" />
+                              <span>
+                                {new Date(event.date).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    weekday: "short",
+                                    month: "short",
+                                    day: "numeric",
+                                  }
                                 )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                          <div className="text-sm text-amber-800">
-                            <span className="font-medium">
-                              Organized by {event.organizer}
-                            </span>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                              <div className="text-sm font-medium text-amber-700">
-                                Date & Time
+                                {event.endDate && (
+                                  <span>
+                                    {" - "}
+                                    {new Date(event.endDate).toLocaleDateString(
+                                      "en-US",
+                                      {
+                                        month: "short",
+                                        day: "numeric",
+                                      }
+                                    )}
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center text-amber-700">
+                                <Clock className="h-4 w-4 mr-1" />
+                                <span className="text-sm">{event.time}</span>
                               </div>
-                              <div className="text-amber-900">
-                                {new Date(event.date).toLocaleDateString()} at{" "}
-                                {event.time}
+                              <div className="flex items-center text-amber-700">
+                                <MapPin className="h-4 w-4 mr-1" />
+                                <span className="text-sm">
+                                  {event.location}
+                                </span>
                               </div>
                             </div>
-                            <div className="space-y-1">
-                              <div className="text-sm font-medium text-amber-700">
-                                Location
-                              </div>
-                              <div className="text-amber-900">
-                                {event.location}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="mt-4 space-y-1">
-                            <div className="text-sm font-medium text-amber-700">
-                              Description
-                            </div>
-                            <p className="text-amber-900">
-                              {event.description}
-                            </p>
-                          </div>
-                          {event.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-3">
-                              {event.tags.map((tag) => (
-                                <Badge
-                                  key={tag}
-                                  variant="outline"
-                                  className="bg-amber-100 text-amber-800 border-amber-200"
-                                >
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                        </CardContent>
-                        <CardFooter className="flex justify-between border-t border-amber-100 pt-3">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-amber-600"
-                          >
-                            <Users className="h-4 w-4 mr-2" />
-                            {event.attendees} attending
-                          </Button>
-                          <div className="flex gap-2">
+                            {event.description && (
+                              <p className="mt-2 text-amber-900">
+                                {event.description}
+                              </p>
+                            )}
+                          </CardContent>
+                          <CardFooter className="flex justify-between border-t border-amber-100 pt-3">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-amber-600"
+                            >
+                              <Users className="h-4 w-4 mr-2" />
+                              {event.attendees} attending
+                            </Button>
                             <Button
                               variant="outline"
                               size="sm"
@@ -871,20 +1102,11 @@ const Community = () => {
                             >
                               I'm interested
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-amber-600"
-                            >
-                              <Share2 className="h-4 w-4 mr-2" />
-                              Share
-                            </Button>
-                          </div>
-                        </CardFooter>
-                      </Card>
-                    ))}
-                  </div>
-                )}
+                          </CardFooter>
+                        </Card>
+                      ))
+                  )}
+                </div>
               </TabsContent>
             </Tabs>
           </div>
@@ -926,20 +1148,22 @@ const Community = () => {
                   </div>
                   <div className="space-y-1">
                     <div className="font-semibold text-amber-900">
-                      {events.filter((e) => e.organizer === user.name).length ||
-                        0}
+                      {events?.filter((e) => e?.organizer === user?.name)
+                        .length || 0}
                     </div>
                     <div className="text-sm text-amber-700">Events</div>
                   </div>
                 </div>
               </CardContent>
               <CardFooter>
-                <Button
-                  variant="outline"
-                  className="w-full border-amber-300 text-amber-700 hover:bg-amber-50"
-                >
-                  <User className="h-4 w-4 mr-2" /> Edit Profile
-                </Button>
+                <Link to={`/profile`} className="w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full border-amber-300 text-amber-700 hover:bg-amber-50"
+                  >
+                    <User className="h-4 w-4 mr-2" /> Edit Profile
+                  </Button>
+                </Link>
               </CardFooter>
             </Card>
 
@@ -969,20 +1193,22 @@ const Community = () => {
                     }, new Map())
                     .values(),
                 ]
-                  .sort((a, b) => b.contributions - a.contributions)
-                  .slice(0, 3)
-                  .map((member) => (
+                  ?.sort((a, b) => b.contributions - a.contributions)
+                  ?.slice(0, 3)
+                  ?.map((member) => (
                     <div key={member._id} className="flex items-center gap-3">
                       <Avatar>
-                        <AvatarImage src={member.avatar} />
-                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                        <AvatarImage src={member?.avatar} />
+                        <AvatarFallback>
+                          {member?.name?.charAt(0)}
+                        </AvatarFallback>
                       </Avatar>
                       <div>
                         <div className="font-medium text-amber-900">
-                          {member.name}
+                          {member?.name}
                         </div>
                         <div className="text-sm text-amber-700">
-                          {member.contributions} contributions
+                          {member?.contributions} contributions
                         </div>
                       </div>
                     </div>

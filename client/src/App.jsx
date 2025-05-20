@@ -33,6 +33,7 @@ import DictionaryAdmin from "./Pages/admin/DictionaryAdmin";
 import ReviewDictionary from "./Pages/admin/ReviewDictionary";
 import AdminHistory from "./Pages/admin/AdminHistory";
 import DocumentReview from "./Pages/admin/DocumentReview";
+import Profile from "./Pages/Profile";
 
 const App = () => {
   const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
@@ -91,6 +92,7 @@ const App = () => {
           <Route path="research/cultural-studies" element={<Studies />} />
           <Route path="akan/community" element={<Community />} />
           <Route path="login" element={<Login />} />
+          <Route path="profile" element={<Profile />} />
           <Route path="akan/language/beginners" element={<Begginers />} />
           <Route path="akan/lesson/intermediate" element={<Intermediate />} />
           <Route path="akan/lesson/advanced" element={<Advanced />} />

@@ -271,8 +271,7 @@ const Dictionary = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="twi">Twi</TabsTrigger>
-              <TabsTrigger value="fante">Fante</TabsTrigger>
-              <TabsTrigger value="english">English</TabsTrigger>
+           
             </TabsList>
           </Tabs>
         </div>

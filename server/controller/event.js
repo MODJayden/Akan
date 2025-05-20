@@ -2,25 +2,16 @@ const Event = require("../Model/Event");
 
 const createEvent = async (req, res) => {
   try {
-    const {
-      title,
-      date,
-      time,
-      location,
-      organizer,
-      attendees,
-      tags,
-      description,
-    } = req.body;
+    const { title, date, time, location, organizer, tags, description } =
+      req.body;
     if (
       !title ||
       !date ||
       !time ||
       !location ||
-      !organizer ||
-      !attendees ||
       !tags ||
-      !description
+      !description ||
+      !organizer
     ) {
       return res.status(400).json({ message: "Missing required fields" });
     }
@@ -29,10 +20,9 @@ const createEvent = async (req, res) => {
       date,
       time,
       location,
-      organizer,
-      attendees,
       tags,
       description,
+      organizer,
     });
     await newEvent.save();
     res.status(201).json({
