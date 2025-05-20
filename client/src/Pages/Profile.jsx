@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,32 +26,25 @@ import {
   Shield,
   Bell,
 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { uploadFile } from "@/store/Culture";
+import { updateAvatar, updateUser } from "@/store/auth";
 
 const Profile = () => {
   const { user } = useSelector((state) => state.auth);
+  const [isUploading, setIsUploading] = useState(false);
+  const dispatch = useDispatch();
+  const [file, setFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
 
   // Form state
   const [formData, setFormData] = useState({
-    name: user.name,
-    email: user.email,
-    bio: user.bio,
-    phone: user.phone,
-    location: user.location,
-    website: user.website,
-  });
-
-  const [securityData, setSecurityData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    twoFactorAuth: true,
-    notifications: true,
+    name: user?.name,
+    email: user?.email,
+    role: user?.role,
   });
 
   const [errors, setErrors] = useState({});
@@ -72,68 +65,25 @@ const Profile = () => {
     }
   };
 
-  const handleSecurityChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setSecurityData({
-      ...securityData,
-      [name]: type === "checkbox" ? checked : value,
-    });
-  };
-
   const validateProfileForm = () => {
     const newErrors = {};
 
-    if (!formData.name.trim()) {
+    if (!formData?.name.trim()) {
       newErrors.name = "Username is required";
-    } else if (formData.name.length < 2) {
+    } else if (formData?.name.length < 2) {
       newErrors.name = "Username must be at least 2 characters";
     }
 
-    if (!formData.email.trim()) {
+    if (!formData?.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "Please enter a valid email";
     }
 
-    if (!formData.bio.trim()) {
-      newErrors.bio = "Bio is required";
-    } else if (formData.bio.length < 4) {
-      newErrors.bio = "Bio must be at least 4 characters";
-    }
-
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Phone is required";
-    } else if (formData.phone.length < 10) {
-      newErrors.phone = "Phone must be at least 10 characters";
-    }
-
-    if (!formData.website.trim()) {
-      newErrors.website = "Website is required";
-    } else if (
-      !/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(
-        formData.website
-      )
-    ) {
-      newErrors.website = "Please enter a valid URL";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const validateSecurityForm = () => {
-    const newErrors = {};
-
-    if (!securityData.currentPassword) {
-      newErrors.currentPassword = "Current password is required";
-    } else if (securityData.currentPassword.length < 8) {
-      newErrors.currentPassword = "Password must be at least 8 characters";
-    }
-
-    if (!securityData.newPassword) {
-      newErrors.newPassword = "New password is required";
-    } else if (securityData.newPassword.length < 8) {
-      newErrors.newPassword = "Password must be at least 8 characters";
+    if (!formData?.role.trim()) {
+      newErrors.role = "Role is required";
+    } else if (formData?.role.trim() === "admin") {
+      newErrors.role = "Role cannot be admin";
     }
 
     setErrors(newErrors);
@@ -142,51 +92,69 @@ const Profile = () => {
 
   const handleProfileSubmit = (e) => {
     e.preventDefault();
+
     if (validateProfileForm()) {
-      setUser({
-        ...user,
-        ...formData,
-      });
-      setIsEditing(false);
-      toast({
-        title: "Profile updated successfully",
-        variant: "default",
-      });
+      dispatch(updateUser({ id: user?._id, data: formData }))
+        .then((res) => {
+          if (res?.payload?.success) {
+            setFormData({
+              name: res.payload.data.name,
+              email: res.payload.data.email,
+              role: res.payload.data.role,
+              avatar: res.payload.data.avatar,
+              createdAt: res.payload.data.createdAt.substring(0, 10),
+            });
+            setErrors({});
+            toast.success("Profile updated successfully");
+          }
+          setIsEditing(false);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     }
   };
 
-  const handleSecuritySubmit = (e) => {
-    e.preventDefault();
-    if (validateSecurityForm()) {
-      toast({
-        title: "Security settings updated",
-        variant: "default",
-      });
-      // Reset password fields
-      setSecurityData({
-        ...securityData,
-        currentPassword: "",
-        newPassword: "",
-      });
+  useEffect(() => {
+    if (file) {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      dispatch(uploadFile(formData))
+        .then((res) => {
+          if (res?.payload?.success) {
+            setFormData((prev) => ({
+              ...prev,
+              avatar: res.payload.data.url,
+            }));
+            dispatch(
+              updateAvatar({ id: user?._id, avatar: res.payload.data.url })
+            ).then((res) => {
+              toast.success("Avatar uploaded successfully");
+              window.location.reload();
+            });
+          } else {
+            toast.error("File upload failed");
+          }
+        })
+        .finally(() => setIsUploading(false));
     }
-  };
+  }, [file]);
 
   const handleAvatarUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setUser({
-          ...user,
-          avatar: event.target.result,
-        });
-      };
-      reader.readAsDataURL(file);
-      toast({
-        title: "Avatar updated successfully",
-        variant: "default",
-      });
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
+
+    if (selectedFile.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB");
+      return;
     }
+
+    setFile(selectedFile);
+    const previewUrl = URL.createObjectURL(selectedFile);
+    setAvatarPreview(previewUrl);
+    setFile(selectedFile);
   };
 
   return (
@@ -198,23 +166,27 @@ const Profile = () => {
             <CardContent className="p-6">
               <div className="flex flex-col items-center gap-4">
                 <Avatar className="h-24 w-24">
-                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarImage
+                    src={avatarPreview || user?.avatar}
+                    alt={user?.name}
+                  />
                   <AvatarFallback className="text-2xl font-medium">
-                    {user.name
+                    {user?.name
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
                   </AvatarFallback>
                 </Avatar>
                 <div className="text-center">
-                  <h2 className="text-xl font-bold">{user.name}</h2>
-                  <p className="text-muted-foreground">{user.email}</p>
+                  <h2 className="text-xl font-bold">{user?.name}</h2>
+                  <p className="text-muted-foreground">{user?.email}</p>
                 </div>
                 <input
                   type="file"
                   id="avatar-upload"
                   accept="image/*"
                   onChange={handleAvatarUpload}
+                  disabled={isUploading}
                   className="hidden"
                 />
                 <Label
@@ -237,21 +209,14 @@ const Profile = () => {
                 <Mail className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Email</p>
-                  <p>{user.email}</p>
+                  <p>{user?.email}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Phone className="h-4 w-4 text-muted-foreground" />
+                <User className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Phone</p>
-                  <p>{user.phone}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Location</p>
-                  <p>{user.location}</p>
+                  <p className="text-sm text-muted-foreground">Role</p>
+                  <p>{user?.role}</p>
                 </div>
               </div>
 
@@ -259,7 +224,7 @@ const Profile = () => {
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Member since</p>
-                  <p>{user.joinDate}</p>
+                  <p>{user?.createdAt?.substring(0, 10)}</p>
                 </div>
               </div>
             </CardContent>
@@ -287,42 +252,6 @@ const Profile = () => {
                         Update your personal details and information.
                       </CardDescription>
                     </div>
-                    {isEditing ? (
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={handleProfileSubmit}>
-                          <Check className="h-4 w-4 mr-2" />
-                          Save
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setFormData({
-                              name: user.name,
-                              email: user.email,
-                              bio: user.bio,
-                              phone: user.phone,
-                              location: user.location,
-                              website: user.website,
-                            });
-                            setErrors({});
-                            setIsEditing(false);
-                          }}
-                        >
-                          <X className="h-4 w-4 mr-2" />
-                          Cancel
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setIsEditing(true)}
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit Profile
-                      </Button>
-                    )}
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -334,14 +263,14 @@ const Profile = () => {
                       </Label>
                       <Input
                         name="name"
-                        value={formData.name}
+                        value={formData?.name}
                         onChange={handleInputChange}
                         disabled={!isEditing}
                         className="disabled:opacity-100 disabled:cursor-text"
                       />
-                      {errors.name && (
+                      {errors?.name && (
                         <p className="text-sm font-medium text-destructive">
-                          {errors.name}
+                          {errors?.name}
                         </p>
                       )}
                     </div>
@@ -353,14 +282,14 @@ const Profile = () => {
                       </Label>
                       <Input
                         name="email"
-                        value={formData.email}
+                        value={formData?.email}
                         onChange={handleInputChange}
-                        disabled={!isEditing}
+                        disabled={true}
                         className="disabled:opacity-100 disabled:cursor-text"
                       />
                       {errors.email && (
                         <p className="text-sm font-medium text-destructive">
-                          {errors.email}
+                          {errors?.email}
                         </p>
                       )}
                     </div>
@@ -368,39 +297,63 @@ const Profile = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label className="flex items-center gap-2">
-                          <Phone className="h-4 w-4" />
-                          Phone
+                          <User className="h-4 w-4" />
+                          Role
                         </Label>
                         <Input
-                          name="phone"
-                          value={formData.phone}
+                          name="role"
+                          value={formData?.role}
                           onChange={handleInputChange}
                           disabled={!isEditing}
                           className="disabled:opacity-100 disabled:cursor-text"
                         />
-                        {errors.phone && (
+                        {errors?.role && (
                           <p className="text-sm font-medium text-destructive">
-                            {errors.phone}
+                            {errors?.role}
                           </p>
                         )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4" />
-                          Location
-                        </Label>
-                        <Input
-                          name="location"
-                          value={formData.location}
-                          onChange={handleInputChange}
-                          disabled={!isEditing}
-                          className="disabled:opacity-100 disabled:cursor-text"
-                        />
                       </div>
                     </div>
                   </form>
                 </CardContent>
+                <CardFooter className="flex justify-end">
+                  {isEditing ? (
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={handleProfileSubmit}>
+                        <Check className="h-4 w-4 mr-2" />
+                        Save
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setFormData({
+                            name: user?.name,
+                            email: user?.email,
+                            bio: user?.bio,
+                            phone: user?.phone,
+                            location: user?.location,
+                            website: user?.website,
+                          });
+                          setErrors({});
+                          setIsEditing(false);
+                        }}
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Profile
+                    </Button>
+                  )}
+                </CardFooter>
               </Card>
             </TabsContent>
           </Tabs>

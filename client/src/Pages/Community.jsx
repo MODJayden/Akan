@@ -129,7 +129,12 @@ const Community = () => {
   const [startX, setStartX] = useState(0);
 
   useEffect(() => {
-    dispatch(fetchDiscussions());
+    dispatch(fetchDiscussions()).then((res) => {
+      if (res?.payload?.success) {
+      } else {
+        toast.error("Failed to fetch discussions");
+      }
+    });
     dispatch(getEvents());
   }, [dispatch]);
 
@@ -142,12 +147,6 @@ const Community = () => {
   const nextMonth = () => {
     setCurrentMonth((prev) => (prev === 11 ? 0 : prev + 1));
     if (currentMonth === 11) setCurrentYear((prev) => prev + 1);
-  };
-
-  const goToToday = () => {
-    setCurrentMonth(currentDate.getMonth());
-    setCurrentYear(currentDate.getFullYear());
-    setSelectedDate(currentDate.toISOString().split("T")[0]);
   };
 
   // Swipe/drag handlers
@@ -1214,14 +1213,7 @@ const Community = () => {
                     </div>
                   ))}
               </CardContent>
-              <CardFooter>
-                <Button
-                  variant="outline"
-                  className="w-full border-amber-300 text-amber-700 hover:bg-amber-50"
-                >
-                  View All Members
-                </Button>
-              </CardFooter>
+              
             </Card>
 
             {/* Social Sharing */}

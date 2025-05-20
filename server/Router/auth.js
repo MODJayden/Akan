@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
+const { handleAvatarChange, updateUser } = require("../controller/user");
 
 router.get("/login/success", (req, res) => {
   if (req.user) {
@@ -29,5 +30,7 @@ router.get("/logout", (req, res) => {
   req.logout();
   res.redirect("/");
 });
+router.post("/avatar/:id", handleAvatarChange);
+router.post("/update/user/:id", updateUser);
 
 module.exports = router;

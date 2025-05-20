@@ -109,7 +109,6 @@ const Navbar = () => {
           to: "/research/history",
           icon: <BookOpen className="h-4 w-4" />,
         },
-       
       ],
     },
     {
@@ -261,7 +260,6 @@ const Navbar = () => {
                         Historical Documents
                       </Link>
                     </DropdownMenuItem>
-                   
                   </DropdownMenuContent>
                 </DropdownMenu>
               </NavigationMenuItem>
@@ -334,7 +332,7 @@ const Navbar = () => {
                         Profile
                       </Link>
                     </DropdownMenuItem>
-                     
+
                     <DropdownMenuSeparator />
                     <Button
                       onClick={handleLogout}
