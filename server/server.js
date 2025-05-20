@@ -70,6 +70,17 @@ if (process.env.NODE_ENV === "production") {
     res.sendFile(path.join(__dirname, "client/build", "index.html"));
   });
 }
+// Serve static files from the client's build folder
+app.use(express.static(path.join(__dirname, "../client/dist")));
+
+// Ensure sitemap.xml and robots.txt are accessible
+app.get("/sitemap.xml", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist/sitemap.xml"));
+});
+
+app.get("/robots.txt", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist/robots.txt"));
+});
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
