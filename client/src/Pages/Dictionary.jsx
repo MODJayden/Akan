@@ -54,7 +54,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getPhrases } from "@/store/Phrases";
-import Canonical from "@/components/component/Canonical";
 
 const Dictionary = () => {
   const dispatch = useDispatch();
@@ -75,7 +74,7 @@ const Dictionary = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { isLoading, entries } = useSelector((state) => state.dictionary);
   const [audioPlaying, setAudioPlaying] = useState(null);
-  const { phrases } = useSelector((state) => state.phrase);
+  const { phrases } = useSelector((state) => state.phrase);  
   const [formData, setFormData] = useState({
     twi: "",
     english: "",
@@ -200,7 +199,6 @@ const Dictionary = () => {
 
   return (
     <div className="min-h-screen   ">
-      <Canonical url="/dictionary" />
       {/* Main Content */}
       <div className="container py-12 px-4 sm:px-6 lg:px-8">
         {/* Search Section */}
@@ -273,6 +271,7 @@ const Dictionary = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="twi">Twi</TabsTrigger>
+           
             </TabsList>
           </Tabs>
         </div>

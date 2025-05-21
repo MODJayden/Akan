@@ -295,7 +295,6 @@ const History = () => {
 
   return (
     <div className="min-h-screen ">
-      <Canonical url="/research/history" />
       {/* Main Content */}
       <div className="container py-12 px-4 sm:px-6 lg:px-8">
         {/* Search and Filter */}

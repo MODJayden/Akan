@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/collapsible";
 import { getAlphabets } from "@/store/Alphabet";
 import { useDispatch, useSelector } from "react-redux";
-import Canonical from "@/components/component/Canonical";
 
 const Pronunciation = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -56,7 +55,6 @@ const Pronunciation = () => {
 
   return (
     <div className="container py-12 px-4 sm:px-6 lg:px-8">
-      <Canonical url="/language/pronunciation" />
       <div className="text-center mb-12">
         <h1 className="text-3xl md:text-4xl font-bold text-amber-900 mb-4">
           Pronunciation Guide

@@ -27,7 +27,6 @@ import {
 } from "@/components/ui/carousel";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import Canonical from "@/components/component/Canonical";
 
 const bg23 = "/bg23.jpeg";
 const bg56 = "/bg56.jpeg";
@@ -123,7 +122,6 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
-      <Canonical url="/" />
       {/* Hero Section */}
       <section className="relative py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
