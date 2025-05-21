@@ -53,6 +53,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { createCultureByUser, getCultures } from "@/store/Culture";
+import Canonical from "@/components/component/Canonical";
 
 const Culture = () => {
   const [activeTab, setActiveTab] = useState("all");
@@ -237,6 +238,7 @@ const Culture = () => {
 
   return (
     <div className="min-h-screen">
+      <Canonical url="/culture" />
       <div className="container py-12 px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
