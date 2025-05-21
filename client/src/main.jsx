@@ -19,4 +19,5 @@ createRoot(document.getElementById("root")).render(
       </HelmetProvider>
     </Provider>
   </StrictMode>
+  
 );
