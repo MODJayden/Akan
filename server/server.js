@@ -3,7 +3,6 @@ const cors = require("cors");
 require("dotenv").config();
 const connectDB = require("./Db/Db");
 const passport = require("passport");
-const expressSession = require("express-session");
 const passportSetup = require("./passport");
 const authRouter = require("./Router/auth");
 const lessonsRouter = require("./Router/lessons");
@@ -19,6 +18,9 @@ const commentRouter = require("./Router/comment");
 const discussionRouter = require("./Router/discussion");
 const eventRouter = require("./Router/event"); // ADDED
 const path = require("path");
+const session = require('express-session');
+const RedisStore = require('connect-redis')(session);
+const redisClient = require('redis').createClient(process.env.REDIS_URL);
 
 connectDB();
 
@@ -26,14 +28,14 @@ const app = express();
 const port = process.env.PORT || 5500;
 
 // Session configuration
-app.use(
-  expressSession({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-  })
-);
 
+
+app.use(session({
+  store: new RedisStore({ client: redisClient }),
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false
+}));
 // Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
