@@ -3,7 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 const connectDB = require("./Db/Db");
 const passport = require("passport");
-const expressSession = require("express-session");
+/* const expressSession = require("express-session"); */
 const passportSetup = require("./passport");
 const authRouter = require("./Router/auth");
 const lessonsRouter = require("./Router/lessons");
