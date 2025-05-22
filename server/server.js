@@ -44,6 +44,13 @@ app.use(
     origin: true,
     credentials: true,
     methods: "GET,PUT,POST,DELETE",
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "x-access-token",
+      "x-key",
+      "x-secret",
+    ],
   })
 );
 
