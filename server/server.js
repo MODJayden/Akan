@@ -25,7 +25,7 @@ connectDB();
 
 const app = express();
 const port = process.env.PORT || 5500;
-
+app.set("trust proxy", 1);
 // Session configuration
 app.use(
   session({
@@ -41,7 +41,7 @@ app.use(
       maxAge: 24 * 60 * 60 * 1000, // 1 day
       secure: process.env.NODE_ENV === "production", // HTTPS only in production
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Required for cross-site
-      httpOnly: true, 
+      httpOnly: true,
       domain:
         process.env.NODE_ENV === "production"
           ? ".akanaaaa.onrender.com"
