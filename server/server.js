@@ -31,10 +31,10 @@ app.use(
   expressSession({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: false, 
+    saveUninitialized: false,
     store: MongoStore.create({
-      mongoUrl: process.env.MONGODB_URI, 
-      ttl: 14 * 24 * 60 * 60, 
+      mongoUrl: process.env.MONGODB_URI,
+      ttl: 14 * 24 * 60 * 60,
     }),
     cookie: {
       maxAge: 24 * 60 * 60 * 1000, // 1 day
@@ -54,7 +54,7 @@ app.use(passport.session());
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:5173" || "https://akan-gken.onrender.com",
+    origin: "https://akan-gken.onrender.com/",
     credentials: true,
     methods: "GET,PUT,POST,DELETE",
     allowedHeaders: [
