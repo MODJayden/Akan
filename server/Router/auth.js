@@ -20,9 +20,12 @@ router.get(
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { failureRedirect: "/login" }),
+  passport.authenticate("google", { 
+    failureRedirect: "/login",
+    successReturnToOrRedirect: "http://akan-gken.onrender.com"
+  }),
   (req, res) => {
-    res.redirect("http://akan-gken.onrender.com");
+    res.redirect("http://akan-gken.onrender.com" );
   }
 );
 
