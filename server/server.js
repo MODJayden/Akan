@@ -64,15 +64,14 @@ app.use("/api/discussions", discussionRouter);
 app.use("/api/events", eventRouter); // ADDED
 
 if (process.env.NODE_ENV === "production") {
-  // Serve static files from the React app
+  // First configuration (React app)
   app.use(express.static(path.join(__dirname, "client/build")));
-
-  // Handle React routing, return all requests to React app
   app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "client/build", "index.html"));
   });
 }
-// Serve static files from the client's build folder
+
+// Second configuration (Vite/dist?)
 app.use(express.static(path.join(__dirname, "../client/dist")));
 
 // Ensure sitemap.xml and robots.txt are accessible
