@@ -28,21 +28,24 @@ const port = process.env.PORT || 5500;
 
 // Session configuration
 app.use(
-  expressSession({
+  session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-      mongoUrl: process.env.MONGODB_URI,
-      ttl: 14 * 24 * 60 * 60,
+      mongoUrl: process.env.MONGO_URI,
+      collectionName: "sessions",
+      ttl: 14 * 24 * 60 * 60, // 14 days
     }),
     cookie: {
       maxAge: 24 * 60 * 60 * 1000, // 1 day
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // HTTPS only in production
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Required for cross-site
+      httpOnly: true, 
       domain:
-        process.env.NODE_ENV === "production" ? ".yourdomain.com" : undefined,
+        process.env.NODE_ENV === "production"
+          ? ".akanaaaa.onrender.com"
+          : undefined,
     },
   })
 );
@@ -80,8 +83,6 @@ app.use("/api/history", historyRouter);
 app.use("/api/comments", commentRouter);
 app.use("/api/discussions", discussionRouter);
 app.use("/api/events", eventRouter); // ADDED
-
-
 
 app.listen(port, () => {
   console.log(`Server is running on ports ${port}`);
