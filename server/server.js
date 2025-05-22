@@ -34,11 +34,9 @@ const port = process.env.PORT || 5500;
   })
 ); */
 
-
 // Initialize Passport
 app.use(passport.initialize());
-app.use(passport.session()); 
-
+app.use(passport.session());
 
 app.use(express.json());
 app.use(
@@ -71,18 +69,19 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
+
 // Second configuration (Vite/dist?)
-app.use(express.static(path.join(__dirname, "../client/dist")));
+app.use(express.static(path.join(__dirname, "client/dist")));
 
 // Ensure sitemap.xml and robots.txt are accessible
 app.get("/sitemap.xml", (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/dist/sitemap.xml"));
+  res.sendFile(path.join(__dirname, "client/dist/sitemap.xml"));
 });
 
 app.get("/robots.txt", (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/dist/robots.txt"));
+  res.sendFile(path.join(__dirname, "client/dist/robots.txt"));
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`Server is running on ports ${port}`);
 });
