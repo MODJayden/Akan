@@ -22,7 +22,7 @@ router.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
   (req, res) => {
-    res.redirect("http://akan-gken.onrender.com/");
+    res.redirect("http://akan-gken.onrender.com");
   }
 );
 
