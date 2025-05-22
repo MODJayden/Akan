@@ -26,17 +26,19 @@ const app = express();
 const port = process.env.PORT || 5500;
 
 // Session configuration
-app.use(
+/* app.use(
   expressSession({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
   })
-);
+); */
+
 
 // Initialize Passport
 app.use(passport.initialize());
-app.use(passport.session());
+app.use(passport.session()); 
+
 
 app.use(express.json());
 app.use(
