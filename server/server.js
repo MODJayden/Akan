@@ -39,13 +39,29 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(express.json());
-app.use(
-  cors({
-    origin: "https://akan-gken.onrender.com",
-    credentials: true,
-    methods: "GET,PUT,POST,DELETE",
-  })
-);
+// Configure allowed origins
+const allowedOrigins = [
+  "https://akan-gken.onrender.com",
+  "http://localhost:5173", // For local development
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options("*", cors(corsOptions));
 
 app.use("/auth", authRouter);
 app.use("/api/lessons", lessonsRouter);
