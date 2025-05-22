@@ -3,7 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 const connectDB = require("./Db/Db");
 const passport = require("passport");
-/* const expressSession = require("express-session"); */
+const expressSession = require("express-session");
 const passportSetup = require("./passport");
 const authRouter = require("./Router/auth");
 const lessonsRouter = require("./Router/lessons");
@@ -19,6 +19,7 @@ const commentRouter = require("./Router/comment");
 const discussionRouter = require("./Router/discussion");
 const eventRouter = require("./Router/event"); // ADDED
 const path = require("path");
+const MongoStore = require("connect-mongo");
 
 connectDB();
 
@@ -26,13 +27,25 @@ const app = express();
 const port = process.env.PORT || 5500;
 
 // Session configuration
-/* app.use(
+app.use(
   expressSession({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false, 
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI, 
+      ttl: 14 * 24 * 60 * 60, 
+    }),
+    cookie: {
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      httpOnly: true,
+      domain:
+        process.env.NODE_ENV === "production" ? ".yourdomain.com" : undefined,
+    },
   })
-); */
+);
 
 // Initialize Passport
 app.use(passport.initialize());
@@ -41,7 +54,7 @@ app.use(passport.session());
 app.use(express.json());
 app.use(
   cors({
-    origin: true,
+    origin: "http://localhost:5173" || "https://akan-gken.onrender.com",
     credentials: true,
     methods: "GET,PUT,POST,DELETE",
     allowedHeaders: [
