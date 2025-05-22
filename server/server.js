@@ -3,7 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 const connectDB = require("./Db/Db");
 const passport = require("passport");
-const expressSession = require("express-session");
+const session = require("express-session");
 const passportSetup = require("./passport");
 const authRouter = require("./Router/auth");
 const lessonsRouter = require("./Router/lessons");
@@ -52,7 +52,7 @@ app.use(
 
 // Initialize Passport
 app.use(passport.initialize());
-app.use(passport.session());
+app.use(passport.session())
 
 app.use(express.json());
 app.use(
