@@ -81,26 +81,7 @@ app.use("/api/comments", commentRouter);
 app.use("/api/discussions", discussionRouter);
 app.use("/api/events", eventRouter); // ADDED
 
-/* if (process.env.NODE_ENV === "production") {
-  // First configuration (React app)
-  app.use(express.static(path.join(__dirname, "client/build")));
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "client/build", "index.html"));
-  });
-}
 
-
-// Second configuration (Vite/dist?)
-app.use(express.static(path.join(__dirname, "client/dist")));
-
-// Ensure sitemap.xml and robots.txt are accessible
-app.get("/sitemap.xml", (req, res) => {
-  res.sendFile(path.join(__dirname, "client/dist/sitemap.xml"));
-});
-
-app.get("/robots.txt", (req, res) => {
-  res.sendFile(path.join(__dirname, "client/dist/robots.txt"));
-}); */
 
 app.listen(port, () => {
   console.log(`Server is running on ports ${port}`);

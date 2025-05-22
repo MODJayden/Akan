@@ -2,21 +2,19 @@ const passport = require("passport");
 const User = require("./Model/User");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
-
-
 // Configure Google Strategy
 passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL,
+      callbackURL: "https://akan-gken.onrender.com/auth/google/callback",
       scope: ["profile", "email"],
       cookie: {
-        secure: process.env.NODE_ENV === 'production',
+        secure: process.env.NODE_ENV === "production",
         httpOnly: true,
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 1 week
-      }
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+      },
     },
 
     async (accessToken, refreshToken, profile, done) => {
@@ -44,11 +42,11 @@ passport.use(
 
 // Configure Passport to use the GoogleStrategy
 passport.serializeUser((user, done) => {
-    done(null, user.id);
-  });
-  
-  passport.deserializeUser((id, done) => {
-    User.findById(id)
-      .then(user => done(null, user))
-      .catch(err => done(err, null));
-  });
+  done(null, user.id);
+});
+
+passport.deserializeUser((id, done) => {
+  User.findById(id)
+    .then((user) => done(null, user))
+    .catch((err) => done(err, null));
+});
