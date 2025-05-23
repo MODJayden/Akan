@@ -57,7 +57,7 @@ app.use(passport.session())
 app.use(express.json());
 app.use(
   cors({
-    origin: "https://akan-gken.onrender.com",
+    origin: process.env.CLIENT_URL,
     credentials: true,
     methods: "GET,PUT,POST,DELETE",
     allowedHeaders: [

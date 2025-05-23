@@ -8,7 +8,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "https://akanaaaa.onrender.com/auth/google/callback",
+      callbackURL:  process.env.CALLBACK_URL,
       scope: ["profile", "email"],
       cookie: {
         secure: process.env.NODE_ENV === "production",
