@@ -35,24 +35,20 @@ app.use(
     store: MongoStore.create({
       mongoUrl: process.env.MONGODB_URI,
       collectionName: "sessions",
-      ttl: 14 * 24 * 60 * 60, // 14 days
+      ttl: 1 * 24 * 60 * 60, // 14 days
     }),
     cookie: {
       maxAge: 24 * 60 * 60 * 1000, // 1 day
       secure: process.env.NODE_ENV === "production", // HTTPS only in production
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Required for cross-site
       httpOnly: true,
-      domain:
-        process.env.NODE_ENV === "production"
-          ? ".akanaaaa.onrender.com"
-          : undefined,
     },
   })
 );
 
 // Initialize Passport
 app.use(passport.initialize());
-app.use(passport.session())
+app.use(passport.session());
 
 app.use(express.json());
 app.use(
